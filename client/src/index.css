@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @font-face {
   font-family: "flaticon_shofy";
   src: url("../fonts/flaticon_shofy.ttf?dee88fc45715450dd1106c3509e3ddac")
