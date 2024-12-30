@@ -21,8 +21,8 @@ const brandSchema = new Schema(
     },
     products: [
       {
-        type: ObjectId,
-        ref: "Products",
+        type: Schema.Types.ObjectId,
+        ref: "Product",
       },
     ],
   },

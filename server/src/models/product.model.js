@@ -50,7 +50,7 @@ const productSchema = new Schema(
       },
       default: "in-stock",
     },
-    reviews: [{ type: Schema.Types.ObjectId, ref: "Reviews" }],
+    reviews: [{ type: Schema.Types.ObjectId, ref: "Review" }],
   },
   { timestamps: true, collection: COLLECTION_NAME }
 );

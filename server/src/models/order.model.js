@@ -1,5 +1,4 @@
 "use strict";
-//
 const { model, Schema } = require("mongoose");
 const DOCUMENT_NAME = "Order";
 const COLLECTION_NAME = "Orders";
@@ -7,14 +6,14 @@ const COLLECTION_NAME = "Orders";
 const orderSchema = new Schema(
   {
     user: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
     cart: [
       {
-        type: ObjectId,
-        ref: "Products",
+        type: Schema.Types.Object,
+        ref: "Product",
       },
     ],
     address: {
