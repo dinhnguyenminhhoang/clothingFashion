@@ -1,6 +1,6 @@
 "use strict";
 //
-const { model, Schema } = require("mongoose");
+const { model, Schema, default: mongoose } = require("mongoose");
 const DOCUMENT_NAME = "User";
 const COLLECTION_NAME = "Users";
 
@@ -33,6 +33,7 @@ const userSchema = new Schema(
       enum: ["ADMIN", "USER"],
       default: ["USER"],
     },
+    reviews: [{ type: Schema.Types.ObjectId, ref: "Review" }],
   },
   { timestamps: true, collection: COLLECTION_NAME }
 );

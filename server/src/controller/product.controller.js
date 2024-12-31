@@ -20,10 +20,17 @@ class ProductController {
       data: await ProductService.getAllProducts(),
     }).send(res);
   };
+  getProductdetail = async (req, res, next) => {
+    const { id } = req.params;
+    new SuccessResponse({
+      data: await ProductService.getProductDetail(id),
+    }).send(res);
+  };
   getPopularProductByType = async (req, res, next) => {
     const type = req.params.type;
+    const query = req.query;
     new SuccessResponse({
-      data: await ProductService.getPopularProductByType(type),
+      data: await ProductService.getPopularProductByType(type, query),
     }).send(res);
   };
   getProductType = async (req, res, next) => {

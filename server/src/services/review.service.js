@@ -13,7 +13,7 @@ const { User } = require("../models/user.model");
 
 class ReviewService {
   static createNewReview = async (data) => {
-    const { userId, productId, rating, comment } = data;
+    const { user: userId, product: productId, rating, comment } = data;
     const existingReview = await Review.findOne({
       user: userId,
       product: productId,
@@ -32,9 +32,7 @@ class ReviewService {
       throw new conflictRequestError(
         "Without purchase you can not give here review."
       );
-
-    const review = await Review.create(data);
-
+    console.log("review", review);
     const product = await Product.findById(productId);
     product.reviews.push(review._id);
     await product.save();

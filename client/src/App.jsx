@@ -10,6 +10,7 @@ import Register from "./Pages/Auth/Register/Register";
 import DefautLayout from "./Layout/DefautLayout/DefautLayout";
 import Home from "./Pages/Home/Home";
 import AdminLayout from "./Layout/AdminLayout/AdminLayout";
+import ProductDetail from "./Pages/ProductDetail/ProductDetail";
 const App = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
@@ -18,6 +19,10 @@ const App = () => {
         <Route path="/register" element={<Register />} />
         <Route element={<DefautLayout />}>
           <Route index element={<Home />} />
+          <Route
+            path="/product-detail/:productId"
+            element={<ProductDetail />}
+          />
         </Route>
         <Route element={<AdminLayout />}></Route>
         {/* <Route path="*" element={<PageNotFound />} />s */}

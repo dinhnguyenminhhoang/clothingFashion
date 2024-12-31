@@ -11,7 +11,7 @@ class ReviewController {
   };
   deleteReview = async (req, res, next) => {
     const { id } = req.params.id;
-    SuccessResponse({
+    new SuccessResponse({
       data: await ReviewService.deleteReview(id),
     }).send(res);
   };

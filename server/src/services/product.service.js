@@ -38,28 +38,45 @@ class ProductService {
     const products = await Product.find({}).populate("reviews");
     return products;
   };
-  static getProductType = async (type, query) => {
-    let products;
-    if (query.new === "true") {
-      products = await Product.find({ productType: type })
-        .sort({ createdAt: -1 })
-        .limit(8)
-        .populate("reviews");
-    } else if (query.topSellers === "true") {
-      products = await Product.find({ productType: type })
-        .sort({ sellCount: -1 })
-        .limit(8)
-        .populate("reviews");
-    } else {
-      products = await Product.find({ productType: type }).populate("reviews");
+  static getProductDetail = async (productId) => {
+    const product = await Product.findOne({ _id: productId }).populate([
+      "reviews",
+      "brand",
+    ]);
+
+    if (!product) {
+      throw new Error("Product not found");
     }
-    return products;
+
+    const avgReview =
+      product.reviews.length > 0
+        ? product.reviews.reduce((acc, review) => acc + review.rating, 0) /
+          product.reviews.length
+        : 0;
+
+    return {
+      ...product.toObject(),
+      avgReview,
+    };
   };
-  static getPopularProductByType = async (type) => {
-    const products = await Product.find({ productType: type })
-      .sort({ "reviews.length": -1 })
-      .limit(8)
-      .populate("reviews");
+  static getProductType = async (type, query) => {
+    const { limit } = query;
+    let products = await Product.find({ productType: type })
+      .populate("reviews")
+      .limit(limit || 8);
+    products = products.map((product) => {
+      const avgReview =
+        product.reviews.length > 0
+          ? product.reviews.reduce((acc, review) => acc + review.rating, 0) /
+            product.reviews.length
+          : 0;
+
+      return {
+        ...product.toObject(),
+        avgReview,
+      };
+    });
+
     return products;
   };
 

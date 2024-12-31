@@ -37,6 +37,11 @@ const productSchema = new Schema(
       required: true,
     },
     sizes: [String],
+    sellCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
     brand: {
       type: Schema.Types.ObjectId,
       ref: "Brand",
@@ -54,7 +59,29 @@ const productSchema = new Schema(
   },
   { timestamps: true, collection: COLLECTION_NAME }
 );
+// Middleware pre-save
+productSchema.pre("save", function (next) {
+  if (this.quantity === 0) {
+    this.status = "out-of-stock";
+  } else {
+    this.status = "in-stock";
+  }
+  next();
+});
 
+// Middleware pre-findOneAndUpdate
+productSchema.pre("findOneAndUpdate", async function (next) {
+  const update = this.getUpdate();
+
+  if (update.quantity === 0) {
+    update.status = "out-of-stock";
+  } else if (update.quantity > 0) {
+    update.status = "in-stock";
+  }
+
+  this.setUpdate(update);
+  next();
+});
 module.exports = {
   Product: model(DOCUMENT_NAME, productSchema),
 };

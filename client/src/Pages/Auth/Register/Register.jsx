@@ -155,7 +155,7 @@ const Register = () => {
               },
               ({ getFieldValue }) => ({
                 validator(_, value) {
-                  if (!value || getFieldValue("Password") === value) {
+                  if (!value || getFieldValue("password") === value) {
                     return Promise.resolve();
                   }
                   return Promise.reject(

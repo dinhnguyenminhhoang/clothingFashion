@@ -24,3 +24,6 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+.ant-image {
+  width: 100%;
+}
