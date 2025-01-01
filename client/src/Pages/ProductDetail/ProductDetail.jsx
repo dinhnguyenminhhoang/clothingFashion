@@ -1,5 +1,5 @@
 import { CheckCircleOutlined } from "@ant-design/icons";
-import { Button, Divider, Image, InputNumber, Rate } from "antd";
+import { Button, Divider, Image, InputNumber, message, Rate } from "antd";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import payment_option_img from "../../assets/img/payment-option.png";
@@ -41,7 +41,36 @@ const ProductDetail = () => {
   const handleSizeClick = (size) => {
     setSelectedSize(size);
   };
-  console.log("product", productsRelated);
+
+  const handleAddToCart = () => {
+    if (!selectedSize) {
+      message.warning("Vui lòng chọn size trước khi thêm vào giỏ hàng!");
+      return;
+    }
+
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    // Kiểm tra sản phẩm đã tồn tại trong giỏ hàng chưa
+    const productIndex = cart.findIndex(
+      (item) => item._id === _id && item.size === selectedSize
+    );
+
+    if (productIndex !== -1) {
+      cart[productIndex].quantity += 1;
+    } else {
+      cart.push({
+        _id: productDetail._id,
+        title: productDetail.title,
+        price: productDetail.price,
+        img: productDetail.img,
+        size: selectedSize,
+        quantity: 1,
+      });
+    }
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+    message.success("Sản phẩm đã được thêm vào giỏ hàng!");
+  };
   return productDetail ? (
     <div className="flex justify-center mt-10">
       <div className="p-4 max-w-7xl w-full">
@@ -137,8 +166,9 @@ const ProductDetail = () => {
                 size="large"
                 disabled={productDetail?.status === "out-of-stock"}
                 className="bg-blue-500 hover:bg-blue-600"
+                onClick={handleAddToCart}
               >
-                Add To Cart
+                Thêm vào giỏ hàng
               </Button>
               <div className="my-4">
                 <div className="flex items-center gap-4">

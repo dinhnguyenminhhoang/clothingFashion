@@ -1,23 +1,54 @@
 import { EyeOutlined, ShoppingCartOutlined } from "@ant-design/icons";
-import { Button, Rate } from "antd";
+import { Button, Rate, message } from "antd";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { formatCurrencyVND } from "../../utils";
 
 const ProductItem = ({ product }) => {
   const navigator = useNavigate();
-  const { img, title, price, avgReview, sellCount, status, sizes } =
+  const { _id, img, title, price, avgReview, reviews, status, sizes } =
     product || {};
 
   const [selectedSize, setSelectedSize] = useState(sizes?.[0]);
+
   const handleSizeClick = (size) => {
     setSelectedSize(size);
+  };
+
+  const handleAddToCart = () => {
+    if (!selectedSize) {
+      message.warning("Vui lòng chọn size trước khi thêm vào giỏ hàng!");
+      return;
+    }
+
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    // Kiểm tra sản phẩm đã tồn tại trong giỏ hàng chưa
+    const productIndex = cart.findIndex(
+      (item) => item._id === _id && item.size === selectedSize
+    );
+
+    if (productIndex !== -1) {
+      cart[productIndex].quantity += 1;
+    } else {
+      cart.push({
+        _id,
+        title,
+        price,
+        img,
+        size: selectedSize,
+        quantity: 1,
+      });
+    }
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+    message.success("Sản phẩm đã được thêm vào giỏ hàng!");
   };
 
   return (
     <div className="bg-white shadow-md rounded-lg overflow-hidden">
       <div className="relative group">
-        <Link to={`/product-detail/${product?._id}`} className="block">
+        <Link to={`/product-detail/${_id}`} className="block">
           <img
             src={img}
             alt="product img"
@@ -28,21 +59,23 @@ const ProductItem = ({ product }) => {
         </Link>
         {status === "out-of-stock" && (
           <div className="absolute top-2 left-2 bg-red-500 text-white text-sm px-3 py-1 rounded">
-            Out of Stock
+            Hết hàng
           </div>
         )}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black bg-opacity-50">
           <div className="flex flex-col space-y-2">
             <Button
-              onClick={() => navigator(`/product-detail/${product?._id}`)}
+              onClick={() => navigator(`/product-detail/${_id}`)}
               icon={<EyeOutlined className="text-2xl" />}
               className="py-5 px-4 bg-white text-black rounded-full hover:bg-gray-200"
             >
               Xem chi tiết
             </Button>
             <Button
+              onClick={handleAddToCart}
               icon={<ShoppingCartOutlined className="text-2xl" />}
               className="py-5 px-4 bg-white text-black rounded-full hover:bg-gray-200"
+              disabled={status === "out-of-stock"}
             >
               Thêm vào giỏ
             </Button>
@@ -52,7 +85,7 @@ const ProductItem = ({ product }) => {
       <div className="p-4">
         <div className="flex items-center gap-2">
           {sizes?.length
-            ? sizes?.map((size) => (
+            ? sizes.map((size) => (
                 <Button
                   key={size}
                   className={`font-bold ${
@@ -66,7 +99,7 @@ const ProductItem = ({ product }) => {
             : null}
         </div>
         <h3 className="text-lg font-medium text-gray-800 mt-2">
-          <Link to={`/product-detail/${product?._id}`}>{title}</Link>
+          <Link to={`/product-detail/${_id}`}>{title}</Link>
         </h3>
         <div className="mt-2 flex items-center space-x-2">
           <span className="text-lg font-semibold text-gray-800">
@@ -79,7 +112,7 @@ const ProductItem = ({ product }) => {
               allowHalf
               className="text-yellow-500"
             />
-            <span>({sellCount})</span>
+            <span>({reviews?.length})</span>
           </div>
         </div>
       </div>

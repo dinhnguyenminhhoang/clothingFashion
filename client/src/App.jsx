@@ -11,6 +11,7 @@ import DefautLayout from "./Layout/DefautLayout/DefautLayout";
 import Home from "./Pages/Home/Home";
 import AdminLayout from "./Layout/AdminLayout/AdminLayout";
 import ProductDetail from "./Pages/ProductDetail/ProductDetail";
+import Shop from "./Pages/Shop/Shop";
 const App = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
@@ -23,6 +24,7 @@ const App = () => {
             path="/product-detail/:productId"
             element={<ProductDetail />}
           />
+          <Route path="/shop" element={<Shop />} />
         </Route>
         <Route element={<AdminLayout />}></Route>
         {/* <Route path="*" element={<PageNotFound />} />s */}

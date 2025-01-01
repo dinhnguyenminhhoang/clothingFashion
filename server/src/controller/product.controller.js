@@ -17,7 +17,7 @@ class ProductController {
   };
   getAllProducts = async (req, res, next) => {
     new SuccessResponse({
-      data: await ProductService.getAllProducts(),
+      data: await ProductService.getAllProducts(req.query),
     }).send(res);
   };
   getProductdetail = async (req, res, next) => {

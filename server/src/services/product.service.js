@@ -3,6 +3,7 @@
 const { default: mongoose } = require("mongoose");
 const { Brand } = require("../models/brand.model");
 const { Product } = require("../models/product.model");
+const { paginate } = require("../utils/paginate");
 
 class ProductService {
   static createNewProduct = async (data) => {
@@ -34,8 +35,60 @@ class ProductService {
     ).lean();
   };
 
-  static getAllProducts = async () => {
-    const products = await Product.find({}).populate("reviews");
+  static getAllProducts = async (query) => {
+    const {
+      page = 1,
+      limit = 6,
+      sortBy,
+      priceRange,
+      status,
+      categories: productType,
+    } = query;
+    const filters = {};
+
+    if (priceRange) {
+      const [minPrice, maxPrice] = priceRange.split(",").map(Number);
+      filters.price = { $gte: minPrice, $lte: maxPrice };
+    }
+
+    if (status) {
+      const stockArray = status.split(",");
+      filters.status = { $in: stockArray };
+    }
+
+    if (productType) {
+      const categoryArray = productType.split(",");
+      filters.productType = { $in: categoryArray };
+    }
+    const options = {};
+    if (sortBy) {
+      const [field, order] = sortBy.split("-");
+      options.sort = { [field]: order === "asc" ? 1 : -1 };
+    }
+    let products = await paginate({
+      model: Product,
+      populate: ["reviews"],
+      limit: +limit,
+      page: +page,
+      filters,
+      options,
+    });
+    const productData = products.data.map((product) => {
+      const avgReview =
+        product.reviews.length > 0
+          ? product.reviews.reduce((acc, review) => acc + review.rating, 0) /
+            product.reviews.length
+          : 0;
+
+      return {
+        ...product,
+        avgReview,
+      };
+    });
+    products = {
+      meta: products.meta,
+      data: productData,
+    };
     return products;
   };
   static getProductDetail = async (productId) => {
