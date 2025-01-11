@@ -17,7 +17,7 @@ class BrandController {
   };
   getALlbrand = async (req, res, next) => {
     new SuccessResponse({
-      data: await BrandService.getAllBrand(),
+      data: await BrandService.getAllBrand(req.query),
     }).send(res);
   };
   updateBrand = async (req, res, next) => {

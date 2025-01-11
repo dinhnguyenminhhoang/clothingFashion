@@ -10,10 +10,24 @@ const orderSchema = new Schema(
       ref: "User",
       required: true,
     },
+    recipientName: String,
     cart: [
       {
-        type: Schema.Types.Object,
-        ref: "Product",
+        product: {
+          type: Schema.Types.ObjectId,
+          ref: "Product",
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+          min: 1,
+          default: 1,
+        },
+        size: {
+          type: String,
+          require: true,
+        },
       },
     ],
     address: {
@@ -32,6 +46,11 @@ const orderSchema = new Schema(
       type: String,
       enum: ["cash", "credit"],
       default: "cash",
+    },
+    isRating: {
+      type: Boolean,
+      require: true,
+      default: true,
     },
     status: {
       type: String,

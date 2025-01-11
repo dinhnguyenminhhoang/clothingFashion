@@ -4,6 +4,7 @@ const { default: mongoose } = require("mongoose");
 const { Brand } = require("../models/brand.model");
 const { Product } = require("../models/product.model");
 const { paginate } = require("../utils/paginate");
+const { NotFoundError } = require("../core/error.response");
 
 class ProductService {
   static createNewProduct = async (data) => {
@@ -34,7 +35,14 @@ class ProductService {
       { ...data }
     ).lean();
   };
-
+  static deleteProduct = async (productId) => {
+    const existingProduct = await Product.findById(productId);
+    if (!existingProduct) throw new Error("Product not found.");
+    return await Product.findOneAndUpdate(
+      { _id: productId },
+      { productStatus: "inActive" }
+    ).lean();
+  };
   static getAllProducts = async (query) => {
     const {
       page = 1,
@@ -43,8 +51,9 @@ class ProductService {
       priceRange,
       status,
       categories: productType,
+      filters = { productStatus: "active" },
+      searchText,
     } = query;
-    const filters = {};
 
     if (priceRange) {
       const [minPrice, maxPrice] = priceRange.split(",").map(Number);
@@ -64,14 +73,18 @@ class ProductService {
     if (sortBy) {
       const [field, order] = sortBy.split("-");
       options.sort = { [field]: order === "asc" ? 1 : -1 };
+    } else {
+      options.sort = { createdAt: -1 };
     }
     let products = await paginate({
       model: Product,
-      populate: ["reviews"],
+      populate: ["reviews", "brand"],
       limit: +limit,
       page: +page,
       filters,
       options,
+      searchText,
+      searchFields: ["title", "description"],
     });
     const productData = products.data.map((product) => {
       const avgReview =
@@ -114,7 +127,10 @@ class ProductService {
   };
   static getProductType = async (type, query) => {
     const { limit } = query;
-    let products = await Product.find({ productType: type })
+    let products = await Product.find({
+      productType: type,
+      productStatus: "active",
+    })
       .populate("reviews")
       .limit(limit || 8);
     products = products.map((product) => {
@@ -135,6 +151,7 @@ class ProductService {
 
   static getTopRatedProduct = async () => {
     const products = await Product.find({
+      productStatus: "active",
       reviews: { $exists: true, $ne: [] },
     }).populate("reviews");
 
@@ -154,6 +171,34 @@ class ProductService {
     topRatedProducts.sort((a, b) => b.rating - a.rating);
 
     return topRatedProducts;
+  };
+  static getProductQuantities = async (productId) => {
+    const product = await Product.findOne({ _id: productId });
+
+    if (!product) {
+      throw new NotFoundError("Product not found");
+    }
+
+    return product?.enteredQuantity;
+  };
+  static createProductQuantities = async (productId, payload) => {
+    const product = await Product.findOne({ _id: productId });
+
+    if (!product) {
+      throw new NotFoundError("Product not found");
+    }
+
+    product.enteredQuantity.push({
+      quantity: payload.quantity,
+      note: payload.note,
+      originPrice: payload.originPrice,
+    });
+
+    product.quantity += payload.quantity;
+
+    await product.save();
+
+    return product;
   };
 }
 module.exports = ProductService;

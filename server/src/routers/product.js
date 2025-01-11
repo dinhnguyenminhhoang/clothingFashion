@@ -2,11 +2,20 @@
 const express = require("express");
 const { asynchandler } = require("../helpers/asynchandler");
 const productController = require("../controller/product.controller");
+const { adminAuthentication } = require("../auth/authUtils");
 const router = express.Router();
 
-router.post("/product", asynchandler(productController.createNewProduct));
+router.post(
+  "/product",
+  adminAuthentication,
+  asynchandler(productController.createNewProduct)
+);
 
-router.put("/product/:id", asynchandler(productController.updateProduct));
+router.put(
+  "/product/:id",
+  adminAuthentication,
+  asynchandler(productController.updateProduct)
+);
 
 router.get("/product", asynchandler(productController.getAllProducts));
 router.get("/product/:id", asynchandler(productController.getProductdetail));
@@ -24,5 +33,13 @@ router.get(
   "/product-top-rate",
   asynchandler(productController.getTopRatedProduct)
 );
-
+router.get(
+  "/product-quantity/:productId",
+  asynchandler(productController.getProductQuantities)
+);
+router.post(
+  "/product-quantity/:productId",
+  asynchandler(productController.createProductQuantities)
+);
+router.delete("/product/:id", asynchandler(productController.deleteProduct));
 module.exports = router;

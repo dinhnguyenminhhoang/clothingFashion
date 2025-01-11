@@ -42,7 +42,9 @@ class AccessService {
     if (!foundUser) {
       throw new badRequestError("user not registered");
     }
-    const { _id: userId, userName, roles } = foundUser;
+    if (foundUser.status !== "active")
+      throw new badRequestError("Tài khoản bị khóa");
+    const { _id: userId, userName, roles, phone } = foundUser;
     const match = await bcrypt.compare(password, foundUser.password);
     if (!match) throw new AuthFailureError("Authentication Error");
     const key = crypto.randomBytes(64).toString(`hex`);
@@ -51,6 +53,7 @@ class AccessService {
         userId: userId,
         email: email,
         userName,
+        phone,
         role: roles,
       },
       key
@@ -59,6 +62,7 @@ class AccessService {
       userId: userId,
       key,
     });
+    console.log("foundUser", foundUser);
     return {
       user: getInfoData({
         fill: ["_id", "userName", "email", "phone"],

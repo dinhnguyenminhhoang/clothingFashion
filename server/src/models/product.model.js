@@ -24,9 +24,24 @@ const productSchema = new Schema(
     },
     quantity: {
       type: Number,
-      required: true,
+      default: 0,
       min: [0, "Product quantity can't be negative"],
     },
+    enteredQuantity: [
+      {
+        quantity: {
+          type: Number,
+          default: 0,
+          min: [0, "Product quantity can't be negative"],
+        },
+        note: String,
+        originPrice: {
+          type: Number,
+          required: true,
+          min: [0, "Product price can't be negative"],
+        },
+      },
+    ],
     productType: {
       type: String,
       required: true,
@@ -56,9 +71,15 @@ const productSchema = new Schema(
       default: "in-stock",
     },
     reviews: [{ type: Schema.Types.ObjectId, ref: "Review" }],
+    productStatus: {
+      type: String,
+      enum: ["active", "inActive"],
+      default: "active",
+    },
   },
   { timestamps: true, collection: COLLECTION_NAME }
 );
+// Middleware pre-save
 // Middleware pre-save
 productSchema.pre("save", function (next) {
   if (this.quantity === 0) {
@@ -66,13 +87,14 @@ productSchema.pre("save", function (next) {
   } else {
     this.status = "in-stock";
   }
+
   next();
 });
-
 // Middleware pre-findOneAndUpdate
 productSchema.pre("findOneAndUpdate", async function (next) {
   const update = this.getUpdate();
 
+  // Cập nhật status
   if (update.quantity === 0) {
     update.status = "out-of-stock";
   } else if (update.quantity > 0) {

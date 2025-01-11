@@ -13,10 +13,15 @@ const brandSchema = new Schema(
       maxLength: 100,
       unique: true,
     },
+    address: {
+      type: String,
+      trim: true,
+      required: [true, "Please provide a brand address"],
+    },
     description: String,
     status: {
       type: String,
-      enum: ["active", "inactive"],
+      enum: ["active", "inActive"],
       default: "active",
     },
     products: [

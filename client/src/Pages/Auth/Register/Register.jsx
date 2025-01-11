@@ -64,7 +64,7 @@ const Register = () => {
           layout="vertical"
         >
           <Form.Item
-            name="username"
+            name="userName"
             rules={[
               {
                 required: true,

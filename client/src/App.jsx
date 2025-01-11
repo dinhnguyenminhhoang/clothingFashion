@@ -5,12 +5,22 @@ import {
   Route,
   RouterProvider,
 } from "react-router-dom";
+import AdminLayout from "./Layout/AdminLayout/AdminLayout";
+import DefautLayout from "./Layout/DefautLayout/DefautLayout";
+import Dashboard from "./Pages/admin/Dashboard/Dashboard";
+import ManagerBrand from "./Pages/admin/ManagerBrand/ManagerBrand";
+import ManagerOrder from "./Pages/admin/ManagerOrder/ManagerOrder";
+import ManagerProduct from "./Pages/admin/ManagerProduct/ManagerProduct";
+import ManagerQuantityProduct from "./Pages/admin/ManagerQuantityProduct/ManagerQuantityProduct";
+import ManagerUser from "./Pages/admin/ManagerUser/ManagerUser";
 import Login from "./Pages/Auth/Login/Login";
 import Register from "./Pages/Auth/Register/Register";
-import DefautLayout from "./Layout/DefautLayout/DefautLayout";
+import Cart from "./Pages/Cart/Cart";
+import Contact from "./Pages/Contact/Contact";
 import Home from "./Pages/Home/Home";
-import AdminLayout from "./Layout/AdminLayout/AdminLayout";
+import OrderHitory from "./Pages/OrderHistory/OrderHitory";
 import ProductDetail from "./Pages/ProductDetail/ProductDetail";
+import Profile from "./Pages/Profile/Profile";
 import Shop from "./Pages/Shop/Shop";
 const App = () => {
   const router = createBrowserRouter(
@@ -25,9 +35,22 @@ const App = () => {
             element={<ProductDetail />}
           />
           <Route path="/shop" element={<Shop />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/history-order" element={<OrderHitory />} />
+          <Route path="/contact" element={<Contact />} />
         </Route>
-        <Route element={<AdminLayout />}></Route>
-        {/* <Route path="*" element={<PageNotFound />} />s */}
+        <Route element={<AdminLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/manager-user" element={<ManagerUser />} />
+          <Route path="/manager-product" element={<ManagerProduct />} />
+          <Route path="/manager-order" element={<ManagerOrder />} />
+          <Route path="/manager-brand" element={<ManagerBrand />} />
+          <Route
+            path="/manager-quantity/:productId"
+            element={<ManagerQuantityProduct />}
+          />
+        </Route>
       </Route>
     )
   );

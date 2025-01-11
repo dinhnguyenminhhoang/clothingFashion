@@ -3,6 +3,7 @@ import { Button } from "antd";
 import React from "react";
 import quanImg from "../../assets/img/collecttion/quan.png";
 import aoImg from "../../assets/img/collecttion/ao.png";
+import { useNavigate } from "react-router-dom";
 const collection = [
   {
     id: 1,
@@ -19,6 +20,7 @@ const collection = [
 ];
 
 const ProductArea = () => {
+  const navigator = useNavigate();
   return (
     <div className="flex items-center gap-4 mt-10 mx-10">
       {collection.map((item) => (
@@ -31,10 +33,11 @@ const ProductArea = () => {
             <span className="text-2xl font-bold">{item.title}</span>
             <Button
               icon={<ArrowRightOutlined />}
+              onClick={() => navigator("/shop")}
               iconPosition="end"
               className="bg-transparent border border-slate-900 w-52"
             >
-              SHOPPING NOW!
+              MUA NGAY!
             </Button>
           </div>
           <img src={item.img} className="w-40 h-56 object-cover" />

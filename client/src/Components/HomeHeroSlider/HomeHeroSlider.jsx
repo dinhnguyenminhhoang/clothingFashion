@@ -9,7 +9,7 @@ import { ArrowRightLong, TextShape } from "../../svg/index";
 // Banner Data
 const bannerData = {
   pre_title: { text: "Giá từ", price: "99.000" },
-  title: "Bộ sưu tập máy tính bảng tốt nhất 2023",
+  title: "Bộ sưu tập quần áo 2023-2025",
   subtitle: {
     text_1: "Ưu đãi đặc biệt ",
     percent: 35,
@@ -56,7 +56,7 @@ const HomeHeroBanner = () => {
               to="/shop"
               className="mt-6 inline-block py-3 px-6 bg-white text-black font-medium rounded shadow hover:bg-gray-100"
             >
-              Shop Now <ArrowRightLong />
+              Mua ngay <ArrowRightLong />
             </Link>
           </div>
           <div className="text-right">

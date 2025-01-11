@@ -9,7 +9,7 @@ export const formatCurrencyVND = (amount) => {
 };
 export const formatDateTime = (date) => {
   if (!(date instanceof Date)) {
-    throw new Error("Tham số phải là một đối tượng Date.");
+    date = new Date(date);
   }
   return new Intl.DateTimeFormat("vi-VN", {
     dateStyle: "medium",

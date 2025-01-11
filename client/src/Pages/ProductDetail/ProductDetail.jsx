@@ -9,6 +9,7 @@ import {
 } from "../../service/productService";
 import { formatCurrencyVND } from "../../utils";
 import ProductItem from "../../Components/ProductItem/ProductItem";
+import { IMAGEURL } from "../../utils/constant";
 
 const ProductDetail = () => {
   const [productDetail, setProductDetail] = useState();
@@ -41,7 +42,6 @@ const ProductDetail = () => {
   const handleSizeClick = (size) => {
     setSelectedSize(size);
   };
-
   const handleAddToCart = () => {
     if (!selectedSize) {
       message.warning("Vui lòng chọn size trước khi thêm vào giỏ hàng!");
@@ -50,9 +50,8 @@ const ProductDetail = () => {
 
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-    // Kiểm tra sản phẩm đã tồn tại trong giỏ hàng chưa
     const productIndex = cart.findIndex(
-      (item) => item._id === _id && item.size === selectedSize
+      (item) => item._id === productDetail._id && item.size === selectedSize
     );
 
     if (productIndex !== -1) {
@@ -67,7 +66,6 @@ const ProductDetail = () => {
         quantity: 1,
       });
     }
-
     localStorage.setItem("cart", JSON.stringify(cart));
     message.success("Sản phẩm đã được thêm vào giỏ hàng!");
   };
@@ -75,14 +73,14 @@ const ProductDetail = () => {
     <div className="flex justify-center mt-10">
       <div className="p-4 max-w-7xl w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
-          <div className="relative bg-[#F5F6F8] rounded-md">
+          <div className="flex justify-center items-center relative bg-[#F5F6F8] rounded-md">
             <Image
               src={
-                productDetail?.img ||
+                IMAGEURL + productDetail?.img ||
                 "https://via.placeholder.com/416x480?text=No+Image"
               }
               alt="product img"
-              className="w-full h-auto object-cover rounded"
+              className="w-full h-auto max-h-[500px] object-contain rounded"
             />
             {productDetail?.status === "out-of-stock" && (
               <div className="absolute top-2 left-2 bg-red-500 text-white px-3 py-1 rounded">
@@ -210,7 +208,9 @@ const ProductDetail = () => {
               </div>
             ))
           ) : (
-            <p>Chưa có đánh giá nào cho sản phẩm này.</p>
+            <p className="italic text-slate-300 flex justify-center items-center">
+              Chưa có đánh giá nào cho sản phẩm này.
+            </p>
           )}
         </div>
         <div>

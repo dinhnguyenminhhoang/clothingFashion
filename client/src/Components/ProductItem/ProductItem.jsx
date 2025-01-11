@@ -3,6 +3,7 @@ import { Button, Rate, message } from "antd";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { formatCurrencyVND } from "../../utils";
+import { IMAGEURL } from "../../utils/constant";
 
 const ProductItem = ({ product }) => {
   const navigator = useNavigate();
@@ -50,7 +51,7 @@ const ProductItem = ({ product }) => {
       <div className="relative group">
         <Link to={`/product-detail/${_id}`} className="block">
           <img
-            src={img}
+            src={IMAGEURL + img}
             alt="product img"
             width={284}
             height={302}

@@ -15,6 +15,12 @@ class ProductController {
       data: await ProductService.updateProduct(id, req.body),
     }).send(res);
   };
+  deleteProduct = async (req, res, next) => {
+    const { id } = req.params;
+    new SuccessResponse({
+      data: await ProductService.deleteProduct(id),
+    }).send(res);
+  };
   getAllProducts = async (req, res, next) => {
     new SuccessResponse({
       data: await ProductService.getAllProducts(req.query),
@@ -43,6 +49,18 @@ class ProductController {
   getTopRatedProduct = async (req, res, next) => {
     new SuccessResponse({
       data: await ProductService.getTopRatedProduct(),
+    }).send(res);
+  };
+  getProductQuantities = async (req, res, next) => {
+    const { productId } = req.params;
+    new SuccessResponse({
+      data: await ProductService.getProductQuantities(productId),
+    }).send(res);
+  };
+  createProductQuantities = async (req, res, next) => {
+    const { productId } = req.params;
+    new CREATED({
+      data: await ProductService.createProductQuantities(productId, req.body),
     }).send(res);
   };
 }

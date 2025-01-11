@@ -7,6 +7,7 @@ import useNotification from "../../../hooks/NotiHook";
 import BtnLoading from "../../../Components/BtnLoading/BtnLoading";
 import { customerLoginAPi } from "../../../service/authService";
 const { Title, Text } = Typography;
+import { jwtDecode } from "jwt-decode";
 
 const Login = () => {
   const navigator = useNavigate();
@@ -16,23 +17,20 @@ const Login = () => {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      let response;
-      if (param.pathname.startsWith("/admin")) {
-        // response = await StaffLogin({ formData: values });
-      } else {
-        response = await customerLoginAPi(values);
-      }
-      console.log("response", response);
+      let response = await customerLoginAPi(values);
       if (response.status === 200) {
         openNotification({
           type: "success",
           message: "Thông báo",
           description: "Đăng nhập thành công",
         });
-        Cookies.set("token", response.data.tokens.accessTokens);
+        Cookies.set("token", response.data.tokens.accessToken);
         Cookies.set("userId", response.data.user._id);
         localStorage.setItem("user", JSON.stringify(response.data.user));
-        navigator("/");
+        const decode = jwtDecode(response.data.tokens.accessToken);
+        if (decode?.role?.includes("ADMIN")) {
+          navigator("/dashboard");
+        } else navigator("/");
       } else {
         openNotification({
           type: "error",

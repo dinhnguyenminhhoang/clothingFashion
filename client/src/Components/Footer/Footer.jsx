@@ -45,7 +45,7 @@ const Footer = () => {
             <div className="mb-8">
               <div className="mb-6">
                 <Link href="/">
-                  <img src={logo} alt="logo" />
+                  <span className="font-bold text-xl">Nhóm15 TTTN</span>
                 </Link>
               </div>
               <p className="text-gray-600">
@@ -68,72 +68,71 @@ const Footer = () => {
             </div>
 
             <div className="mb-8">
-              <h4 className="text-lg font-semibold mb-4">My Account</h4>
+              <h4 className="text-lg font-semibold mb-4">Tài khoản của tôi</h4>
               <ul className="text-gray-600 space-y-2">
                 <li>
                   <a href="#" className="hover:text-blue-500">
-                    Track Orders
+                    Theo dõi đơn hàng
                   </a>
                 </li>
                 <li>
                   <a href="#" className="hover:text-blue-500">
-                    Shipping
+                    Giao hàng
                   </a>
                 </li>
                 <li>
                   <a href="#" className="hover:text-blue-500">
-                    Wishlist
+                    Danh sách yêu thích
                   </a>
                 </li>
                 <li>
                   <a href="#" className="hover:text-blue-500">
-                    My Account
+                    Tài khoản của tôi
                   </a>
                 </li>
                 <li>
                   <a href="#" className="hover:text-blue-500">
-                    Order History
+                    Lịch sử đơn hàng
                   </a>
                 </li>
                 <li>
                   <a href="#" className="hover:text-blue-500">
-                    Returns
+                    Trả hàng
                   </a>
                 </li>
               </ul>
             </div>
-
             <div className="mb-8">
-              <h4 className="text-lg font-semibold mb-4">Information</h4>
+              <h4 className="text-lg font-semibold mb-4">Thông tin</h4>
               <ul className="text-gray-600 space-y-2">
                 <li>
                   <a href="#" className="hover:text-blue-500">
-                    Our Story
+                    Câu chuyện của chúng tôi
                   </a>
                 </li>
                 <li>
                   <a href="#" className="hover:text-blue-500">
-                    Careers
+                    Nghề nghiệp
                   </a>
                 </li>
                 <li>
                   <a href="#" className="hover:text-blue-500">
-                    Privacy Policy
+                    Chính sách bảo mật
                   </a>
                 </li>
                 <li>
                   <a href="#" className="hover:text-blue-500">
-                    Terms & Conditions
+                    Điều khoản & Điều kiện
                   </a>
                 </li>
                 <li>
                   <a href="#" className="hover:text-blue-500">
-                    Latest News
+                    Tin tức mới nhất
                   </a>
                 </li>
                 <li>
                   <a href="#" className="hover:text-blue-500">
-                    Contact Us
+                    Liên hệ với chúng tôi
                   </a>
                 </li>
               </ul>
@@ -158,27 +157,10 @@ const Footer = () => {
                   </span>
                   <p>
                     <a
-                      href="mailto:dinhnguyenminhhoang@gmail.com"
+                      href="mailto:Nhom15tttn@gmail.com"
                       className="hover:text-blue-500"
                     >
-                      dinhnguyenminhhoang@gmail.com
-                    </a>
-                  </p>
-                </div>
-                <div className="flex items-start">
-                  <span className="mr-4 text-gray-500">
-                    <Location />
-                  </span>
-                  <p>
-                    <a
-                      href="https://www.google.com/maps/place/Sleepy+Hollow+Rd,+Gouverneur,+NY+13642,+USA/@44.3304966,-75.4552367,17z/data=!3m1!4b1!4m6!3m5!1s0x4cccddac8972c5eb:0x56286024afff537a!8m2!3d44.3304928!4d-75.453048!16s%2Fg%2F1tdsjdj4"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="hover:text-blue-500"
-                    >
-                      Ho CHi Minh
-                      <br />
-                      Thu Duc
+                      Nhom15tttn@gmail.com
                     </a>
                   </p>
                 </div>
@@ -189,10 +171,10 @@ const Footer = () => {
         <div className="border-t mt-8 pt-6">
           <div className="container mx-auto flex flex-col md:flex-row justify-between items-center text-gray-600">
             <p className="text-sm">
-              © {new Date().getFullYear()} All Rights Reserved | React.js
+              © {new Date().getFullYear()} Tất cả quyền được bảo lưu | React.js
             </p>
             <div className="mt-4 md:mt-0">
-              <img src={pay} alt="pay" />
+              <img src={pay} alt="thanh toán" />
             </div>
           </div>
         </div>
