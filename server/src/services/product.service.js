@@ -179,7 +179,27 @@ class ProductService {
       throw new NotFoundError("Product not found");
     }
 
-    return product?.enteredQuantity;
+    return product.enteredQuantity.map((entry) => {
+      const sizeDetails = product.sizes.find(
+        (size) => size.size === entry.size
+      );
+      return {
+        _id: entry._id,
+        quantity: entry.quantity,
+        note: entry.note,
+        size: sizeDetails ? sizeDetails : null,
+      };
+    });
+  };
+
+  static getProductSizes = async (productId) => {
+    const product = await Product.findOne({ _id: productId });
+
+    if (!product) {
+      throw new NotFoundError("Product not found");
+    }
+
+    return product?.sizes;
   };
   static createProductQuantities = async (productId, payload) => {
     const product = await Product.findOne({ _id: productId });
@@ -188,16 +208,24 @@ class ProductService {
       throw new NotFoundError("Product not found");
     }
 
+    // Cập nhật số lượng trong mảng sizes tương ứng với size nhập vào
+    const sizeIndex = product.sizes.findIndex(
+      (size) => size._id.toString() === payload.size.toString()
+    );
+    // Thêm thông tin nhập hàng vào enteredQuantity
     product.enteredQuantity.push({
       quantity: payload.quantity,
       note: payload.note,
-      originPrice: payload.originPrice,
+      size: product.sizes[sizeIndex].size, // size sẽ là ObjectId liên kết với size trong mảng sizes
     });
 
-    product.quantity += payload.quantity;
-
+    if (sizeIndex !== -1) {
+      // Tăng quantity cho size tương ứng
+      product.sizes[sizeIndex].quantity += Number(payload.quantity);
+    } else {
+      throw new NotFoundError("Size not found");
+    }
     await product.save();
-
     return product;
   };
 }

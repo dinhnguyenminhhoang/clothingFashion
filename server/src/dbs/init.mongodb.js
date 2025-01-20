@@ -1,7 +1,7 @@
 "use strict";
 
 const mongoose = require("mongoose");
-const connectString = `mongodb+srv://dinhnguyenminhhoang28:28wwtq7oVaSh0sjW@clothingfashion.yaydm.mongodb.net/shopDb?retryWrites=true&w=majority&appName=clothingFashion`;
+const connectString = `mongodb+srv://datvminh07:SEljtn3fSoNadbd2@cluster0.qj9kf.mongodb.net/shopDb?retryWrites=true&w=majority&appName=Cluster0`;
 
 class Database {
   constructor() {

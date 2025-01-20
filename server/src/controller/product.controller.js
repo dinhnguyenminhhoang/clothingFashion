@@ -57,6 +57,12 @@ class ProductController {
       data: await ProductService.getProductQuantities(productId),
     }).send(res);
   };
+  getProductSizes = async (req, res, next) => {
+    const { productId } = req.params;
+    new SuccessResponse({
+      data: await ProductService.getProductSizes(productId),
+    }).send(res);
+  };
   createProductQuantities = async (req, res, next) => {
     const { productId } = req.params;
     new CREATED({

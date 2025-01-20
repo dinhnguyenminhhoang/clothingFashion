@@ -59,22 +59,22 @@ const ManagerQuantityProduct = () => {
       render: (text) => <span>{text}</span>,
     },
     {
+      title: "Size",
+      dataIndex: "size",
+      key: "size",
+      render: (text) => <span>{text?.size}</span>,
+    },
+    {
       title: "Số lượng",
       dataIndex: "quantity",
       key: "quantity",
       render: (text) => <span>{text}</span>,
     },
     {
-      title: "Mô tả",
+      title: "Ghi chú",
       dataIndex: "note",
       key: "note",
-      render: (text) => <span>{text}</span>,
-    },
-    {
-      title: "Giá nhập",
-      dataIndex: "originPrice",
-      key: "originPrice",
-      render: (text) => <span>{formatCurrencyVND(text)}</span>,
+      render: (text) => <span>{text || "không có ghi chú"}</span>,
     },
   ];
 
@@ -140,6 +140,7 @@ const ManagerQuantityProduct = () => {
         <ProductQuantityForm
           onSave={handleSave}
           onCancel={() => setIsShowModal(false)}
+          productId={productId}
         />
       </Modal>
     </div>

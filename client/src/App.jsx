@@ -22,12 +22,16 @@ import OrderHitory from "./Pages/OrderHistory/OrderHitory";
 import ProductDetail from "./Pages/ProductDetail/ProductDetail";
 import Profile from "./Pages/Profile/Profile";
 import Shop from "./Pages/Shop/Shop";
+import ForgotPassword from "./Pages/Auth/ForgotPassword/ForgotPassword";
+import ResetPassword from "./Pages/Auth/ResetPassword/ResetPassword";
 const App = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path="/">
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route element={<DefautLayout />}>
           <Route index element={<Home />} />
           <Route

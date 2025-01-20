@@ -32,7 +32,6 @@ const authentication = asynchandler(async (req, res, next) => {
       "Invalid request: Missing or malformed Authorization header"
     );
   }
-
   const accessToken = authHeader.split(" ")[1];
 
   try {
@@ -41,6 +40,7 @@ const authentication = asynchandler(async (req, res, next) => {
       throw new AuthFailureError("Invalid user");
     }
     req.user = decodeUser;
+    req.keyStore = keyStore;
     return next();
   } catch (error) {
     throw new AuthFailureError("Unauthorized access");

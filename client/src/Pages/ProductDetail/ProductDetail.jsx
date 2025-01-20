@@ -16,13 +16,13 @@ const ProductDetail = () => {
   const [productsRelated, setProductRelated] = useState();
   const { productId } = useParams();
   const [selectedSize, setSelectedSize] = useState();
-
+  const [selectQuantity, setSelectQuantity] = useState(1);
   useEffect(() => {
     const fetchData = async () => {
       const res = await getProductDetail(productId);
       if (res.status === 200) {
         setProductDetail(res.data);
-        setSelectedSize(res.data?.sizes?.[0]);
+        setSelectedSize(res.data?.sizes?.[0]?.size);
       }
     };
 
@@ -48,14 +48,15 @@ const ProductDetail = () => {
       return;
     }
 
-    const cart = JSON.parse(localStorage.getItem("cart")) || [];
-
+    const cart = localStorage.getItem("cart")
+      ? JSON.parse(localStorage.getItem("cart"))
+      : [];
     const productIndex = cart.findIndex(
       (item) => item._id === productDetail._id && item.size === selectedSize
     );
 
     if (productIndex !== -1) {
-      cart[productIndex].quantity += 1;
+      cart[productIndex].quantity += selectQuantity;
     } else {
       cart.push({
         _id: productDetail._id,
@@ -63,15 +64,15 @@ const ProductDetail = () => {
         price: productDetail.price,
         img: productDetail.img,
         size: selectedSize,
-        quantity: 1,
+        quantity: selectQuantity,
       });
     }
     localStorage.setItem("cart", JSON.stringify(cart));
     message.success("Sản phẩm đã được thêm vào giỏ hàng!");
   };
   return productDetail ? (
-    <div className="flex justify-center mt-10">
-      <div className="p-4 max-w-7xl w-full">
+    <div className="flex justify-center">
+      <div className="p-4 container w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
           <div className="flex justify-center items-center relative bg-[#F5F6F8] rounded-md">
             <Image
@@ -84,7 +85,7 @@ const ProductDetail = () => {
             />
             {productDetail?.status === "out-of-stock" && (
               <div className="absolute top-2 left-2 bg-red-500 text-white px-3 py-1 rounded">
-                Out of Stock
+                Hết hàng
               </div>
             )}
           </div>
@@ -137,23 +138,41 @@ const ProductDetail = () => {
                     defaultValue={1}
                     className="w-20"
                     disabled={productDetail?.status === "out-of-stock"}
+                    value={selectQuantity}
+                    onChange={(value) => setSelectQuantity(value)}
                   />
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-lg font-medium">Kích cỡ:</span>
                   {productDetail?.sizes?.length
                     ? productDetail?.sizes?.map((size) => (
-                        <Button
-                          key={size}
-                          className={`font-bold ${
-                            selectedSize === size
-                              ? "bg-blue-500 text-white"
-                              : ""
-                          }`}
-                          onClick={() => handleSizeClick(size)}
-                        >
-                          {size}
-                        </Button>
+                        <div key={size.size} className="relative group">
+                          <Button
+                            className={`font-bold ${
+                              selectedSize === size.size
+                                ? "bg-blue-500 text-white"
+                                : size.quantity === 0
+                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                : ""
+                            }`}
+                            onClick={() =>
+                              size.quantity > 0 && handleSizeClick(size.size)
+                            }
+                            disabled={size.quantity === 0}
+                          >
+                            {size.size}
+                          </Button>
+
+                          {size.quantity === 0 && (
+                            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-[2px] bg-red-500 rotate-45 pointer-events-none"></div>
+                          )}
+
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 pointer-events-none">
+                            {size.quantity === 0
+                              ? "Hết hàng"
+                              : `Còn lại: ${size.quantity}`}
+                          </div>
+                        </div>
                       ))
                     : null}
                 </div>

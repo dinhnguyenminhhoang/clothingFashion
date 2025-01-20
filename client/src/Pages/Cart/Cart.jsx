@@ -15,10 +15,12 @@ import { createOrder } from "../../service/orderService";
 import { Elements } from "@stripe/react-stripe-js";
 import { IMAGEURL, stripeKey } from "../../utils/constant";
 import { loadStripe } from "@stripe/stripe-js";
+import useNotification from "../../hooks/NotiHook";
 const stripePromise = loadStripe(stripeKey);
 
 const Cart = () => {
   const [cart, setCart] = useState([]);
+  const openNotification = useNotification();
   const [userInfo, setUserInfo] = useState();
   const [showDeliveryForm, setShowDeliveryForm] = useState(false);
   const [showStripeModal, setShowStripeModal] = useState(false);
@@ -38,7 +40,7 @@ const Cart = () => {
       setCart(JSON.parse(savedCart));
     }
     if (user) {
-      setUserInfo(JSON.parse(savedCart));
+      setUserInfo(JSON.parse(user));
     }
   }, []);
 
@@ -65,6 +67,7 @@ const Cart = () => {
   const handleRemoveItem = (index) => {
     const updatedCart = cart.filter((_, i) => i !== index);
     setCart(updatedCart);
+    localStorage.setItem("cart", updatedCart);
   };
 
   const handleSubmitDeliveryInfo = () => {
@@ -91,6 +94,7 @@ const Cart = () => {
     try {
       const filteredCart = cart.map((item) => ({
         product: item._id,
+        productName: item.title,
         quantity: item.quantity,
         size: item.size,
       }));
@@ -110,6 +114,11 @@ const Cart = () => {
         setShowStripeModal();
       }
     } catch (error) {
+      openNotification({
+        type: "error",
+        message: "Thông báo",
+        error: error,
+      });
     } finally {
       setShowPaymentModal(false);
     }

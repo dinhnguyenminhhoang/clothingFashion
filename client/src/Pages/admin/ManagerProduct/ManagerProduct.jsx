@@ -147,7 +147,9 @@ const ManagerProduct = () => {
       title: "Sizes",
       dataIndex: "sizes",
       key: "sizes",
-      render: (sizes) => <span>{sizes?.join(", ")}</span>,
+      render: (sizes) => (
+        <span>{sizes?.map((size) => size.size).join(", ")}</span>
+      ),
     },
     {
       title: "Nhãn hàng",
@@ -171,7 +173,7 @@ const ManagerProduct = () => {
             onClick={() => navigator(`/manager-quantity/${record._id}`)}
             icon={<EyeOutlined />}
           >
-            số lượng
+            Nhập hàng
           </Button>
           <Button
             danger
@@ -184,13 +186,36 @@ const ManagerProduct = () => {
       ),
     },
   ];
+
   const handleSave = async (values) => {
     try {
       let res;
       if (editProduct?._id) {
-        res = await updateProduct(values, editProduct._id);
+        res = await updateProduct(
+          {
+            ...values,
+            sizes: values.sizes?.map((productSize) => {
+              const updatedSize = editProduct?.sizes?.find(
+                (size) => size._id === productSize._id
+              );
+              return updatedSize
+                ? {
+                    ...productSize,
+                    quantity: updatedSize.quantity,
+                  }
+                : {
+                    ...productSize,
+                    quantity: 0,
+                  };
+            }),
+          },
+          editProduct._id
+        );
       } else {
-        res = await createProduct(values);
+        res = await createProduct({
+          ...values,
+          sizes: values.sizes?.map((size) => ({ ...size, quantity: 0 })),
+        });
       }
       if (res.status === 201) {
         openNotification({

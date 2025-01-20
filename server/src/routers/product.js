@@ -37,6 +37,10 @@ router.get(
   "/product-quantity/:productId",
   asynchandler(productController.getProductQuantities)
 );
+router.get(
+  "/product-size/:productId",
+  asynchandler(productController.getProductSizes)
+);
 router.post(
   "/product-quantity/:productId",
   asynchandler(productController.createProductQuantities)

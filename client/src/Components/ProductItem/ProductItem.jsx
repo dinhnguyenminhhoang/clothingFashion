@@ -10,7 +10,7 @@ const ProductItem = ({ product }) => {
   const { _id, img, title, price, avgReview, reviews, status, sizes } =
     product || {};
 
-  const [selectedSize, setSelectedSize] = useState(sizes?.[0]);
+  const [selectedSize, setSelectedSize] = useState(sizes?.[0]?.size);
 
   const handleSizeClick = (size) => {
     setSelectedSize(size);
@@ -41,7 +41,6 @@ const ProductItem = ({ product }) => {
         quantity: 1,
       });
     }
-
     localStorage.setItem("cart", JSON.stringify(cart));
     message.success("Sản phẩm đã được thêm vào giỏ hàng!");
   };
@@ -55,7 +54,7 @@ const ProductItem = ({ product }) => {
             alt="product img"
             width={284}
             height={302}
-            className="w-full h-auto object-cover"
+            className="w-full h-[420px] object-cover"
           />
         </Link>
         {status === "out-of-stock" && (
@@ -75,7 +74,7 @@ const ProductItem = ({ product }) => {
             <Button
               onClick={handleAddToCart}
               icon={<ShoppingCartOutlined className="text-2xl" />}
-              className="py-5 px-4 bg-white text-black rounded-full hover:bg-gray-200"
+              className="py-5 px-4 bg-white text-black rounded-full hover:bg-gray-200 disabled:bg-slate-100"
               disabled={status === "out-of-stock"}
             >
               Thêm vào giỏ
@@ -87,18 +86,37 @@ const ProductItem = ({ product }) => {
         <div className="flex items-center gap-2">
           {sizes?.length
             ? sizes.map((size) => (
-                <Button
-                  key={size}
-                  className={`font-bold ${
-                    selectedSize === size ? "bg-blue-500 text-white" : ""
-                  }`}
-                  onClick={() => handleSizeClick(size)}
-                >
-                  {size}
-                </Button>
+                <div key={size.size} className="relative group">
+                  <Button
+                    className={`font-bold ${
+                      selectedSize === size.size
+                        ? "bg-blue-500 text-white"
+                        : size.quantity === 0
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : ""
+                    }`}
+                    onClick={() =>
+                      size.quantity > 0 && handleSizeClick(size.size)
+                    }
+                    disabled={size.quantity === 0}
+                  >
+                    {size.size}
+                  </Button>
+
+                  {size.quantity === 0 && (
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-[2px] bg-red-500 rotate-45 pointer-events-none"></div>
+                  )}
+
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 pointer-events-none">
+                    {size.quantity === 0
+                      ? "Hết hàng"
+                      : `Còn lại: ${size.quantity}`}
+                  </div>
+                </div>
               ))
             : null}
         </div>
+
         <h3 className="text-lg font-medium text-gray-800 mt-2">
           <Link to={`/product-detail/${_id}`}>{title}</Link>
         </h3>
@@ -109,7 +127,7 @@ const ProductItem = ({ product }) => {
           <div className="flex items-center gap-4">
             <Rate
               disabled
-              defaultValue={avgReview}
+              defaultValue={avgReview || 5}
               allowHalf
               className="text-yellow-500"
             />

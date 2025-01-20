@@ -1,5 +1,5 @@
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
-import { Divider, Form, Input, Typography } from "antd";
+import { Divider, Form, Input, Space, Typography } from "antd";
 import Cookies from "js-cookie";
 import React, { useState } from "react";
 import { useNavigate, useResolvedPath } from "react-router-dom";
@@ -120,15 +120,26 @@ const Login = () => {
           </Form.Item>
         </Form>
         <Divider>Hoặc</Divider>
-        <Text className="text-center block">
-          Chưa có tài khoản?{" "}
-          <span
-            onClick={() => navigator("/register")}
-            className="text-blue-500 cursor-pointer underline"
-          >
-            Đăng ký ngay
-          </span>
-        </Text>
+        <Space className="justify-center items-center w-full">
+          <Text className="text-center block">
+            Chưa có tài khoản?{" "}
+            <span
+              onClick={() => navigator("/register")}
+              className="text-blue-500 cursor-pointer underline"
+            >
+              Đăng ký ngay
+            </span>
+          </Text>
+          <Text className="text-center block">
+            Hoặc
+            <span
+              onClick={() => navigator("/forgot-password")}
+              className="text-blue-500 cursor-pointer underline ml-2"
+            >
+              Quên mật khẩu
+            </span>
+          </Text>
+        </Space>
       </div>
     </div>
   );

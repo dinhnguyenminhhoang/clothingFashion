@@ -6,5 +6,15 @@ const customerRegisterApi = (formData) => {
 const customerLoginAPi = (formData) => {
   return instance.post("/login", formData);
 };
-
-export { customerRegisterApi, customerLoginAPi };
+const forgotPasswordApi = (formData) => {
+  return instance.post("/forgot-password", formData);
+};
+const resetPasswordApi = (formData) => {
+  return instance.post("/reset-password", formData);
+};
+export {
+  customerRegisterApi,
+  customerLoginAPi,
+  forgotPasswordApi,
+  resetPasswordApi,
+};

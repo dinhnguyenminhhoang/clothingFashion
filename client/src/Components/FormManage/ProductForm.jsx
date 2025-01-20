@@ -5,15 +5,19 @@ import UploadImage from "../UploadImage/UploadImage";
 import { getAllBrand } from "../../service/brandService";
 
 const ProductForm = ({ initialValues, onSave, onCancel }) => {
+  console.log("initialValues", initialValues);
   const [form] = Form.useForm();
   const [imageUrl, setImageUrl] = useState("");
   const [listBrand, setListBrand] = useState([]);
   useEffect(() => {
     form.resetFields();
     if (initialValues) {
-      const sizes = initialValues?.sizes?.map((item) => ({
-        sizes: item,
-      }));
+      const formattedSizes =
+        initialValues.sizes?.map((item) => ({
+          size: item.size,
+          originPrice: item.originPrice,
+          _id: item._id,
+        })) || [];
       form.setFieldsValue({
         title: initialValues?.title,
         price: initialValues.price,
@@ -21,15 +25,14 @@ const ProductForm = ({ initialValues, onSave, onCancel }) => {
         description: initialValues.description,
         img: initialValues.img,
         brand: initialValues.brand._id,
-        sizes: sizes,
+        sizes: formattedSizes,
       });
       setImageUrl(initialValues.img);
     }
   }, [initialValues]);
 
   const handleFinish = (values) => {
-    const sizes = values.sizes.map((item) => item.sizes);
-    onSave({ ...values, img: imageUrl, sizes: sizes });
+    onSave({ ...values, img: imageUrl });
   };
   const handleUploadSuccess = (url) => {
     setImageUrl(url);
@@ -60,7 +63,7 @@ const ProductForm = ({ initialValues, onSave, onCancel }) => {
       </Form.Item>
       <Form.Item
         name="price"
-        label="Giá sản phẩm"
+        label="Giá bán"
         rules={[
           {
             required: true,
@@ -68,7 +71,7 @@ const ProductForm = ({ initialValues, onSave, onCancel }) => {
           },
         ]}
       >
-        <Input placeholder="Nhập Giá sản phẩm" />
+        <Input placeholder="Nhập giá bán" />
       </Form.Item>
       <Form.Item
         name="description"
@@ -126,10 +129,34 @@ const ProductForm = ({ initialValues, onSave, onCancel }) => {
                   alignItems: "baseline",
                 }}
               >
+                {initialValues ? (
+                  <Form.Item
+                    {...field}
+                    name={[field.name, "_id"]}
+                    fieldKey={[field.fieldKey, "_id"]}
+                    label="_id"
+                    rules={[
+                      {
+                        required:
+                          initialValues.sizes &&
+                          initialValues.sizes[index] &&
+                          initialValues.sizes[index]._id, // Chỉ yêu cầu _id nếu có trong initialValues
+                        message: "Please input the _id!",
+                      },
+                    ]}
+                    style={{
+                      flex: 1,
+                      marginRight: "8px",
+                    }}
+                    className={"hidden"} // Ẩn _id nếu không có
+                  >
+                    <Input />
+                  </Form.Item>
+                ) : null}
                 <Form.Item
                   {...field}
-                  name={[field.name, "sizes"]}
-                  fieldKey={[field.fieldKey, "sizes"]}
+                  name={[field.name, "size"]}
+                  fieldKey={[field.fieldKey, "size"]}
                   label="Size"
                   rules={[
                     {
@@ -144,16 +171,35 @@ const ProductForm = ({ initialValues, onSave, onCancel }) => {
                 >
                   <Input />
                 </Form.Item>
+                <Form.Item
+                  {...field}
+                  name={[field.name, "originPrice"]}
+                  fieldKey={[field.fieldKey, "originPrice"]}
+                  label="Giá nhập"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input the originPrice!",
+                    },
+                  ]}
+                  style={{
+                    flex: 1,
+                    marginRight: "8px",
+                  }}
+                >
+                  <Input type="Number" />
+                </Form.Item>
                 <div>
-                  <h1 className="mb-2 ml-2">Xóa trường</h1>
+                  <h1 className="mb-2 ml-2">Xóa</h1>
                   <Button
                     type="dashed"
+                    danger
                     onClick={() => remove(field.name)}
                     style={{
                       marginBottom: "24px",
                     }}
                   >
-                    Remove
+                    Xóa
                   </Button>
                 </div>
               </div>

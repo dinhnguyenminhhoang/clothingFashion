@@ -40,6 +40,9 @@ const deleteProduct = (productId) => {
 const getProductQuantity = (productId) => {
   return instance.get(`/product-quantity/${productId}`);
 };
+const getProductSizes = (productId) => {
+  return instance.get(`/product-size/${productId}`);
+};
 const createProductQuantity = (productId, formData) => {
   return instance.post(`/product-quantity/${productId}`, formData);
 };
@@ -56,4 +59,5 @@ export {
   getProductQuantity,
   createProductQuantity,
   updateProductQuantity,
+  getProductSizes,
 };

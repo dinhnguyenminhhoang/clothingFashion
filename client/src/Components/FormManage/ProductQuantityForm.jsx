@@ -1,9 +1,15 @@
-import { Button, Form, Input, InputNumber } from "antd";
-import React, { useEffect } from "react";
+import { Button, Form, Input, InputNumber, Select } from "antd";
+import React, { useEffect, useState } from "react";
+import { getProductSizes } from "../../service/productService";
 
-const ProductQuantityForm = ({ initialValues, onSave, onCancel }) => {
+const ProductQuantityForm = ({
+  initialValues,
+  onSave,
+  onCancel,
+  productId,
+}) => {
   const [form] = Form.useForm();
-
+  const [productSizes, setProductSize] = useState([]);
   useEffect(() => {
     form.resetFields();
     if (initialValues) {
@@ -14,10 +20,35 @@ const ProductQuantityForm = ({ initialValues, onSave, onCancel }) => {
   const handleFinish = (values) => {
     onSave(values);
   };
-
+  useEffect(() => {
+    const fetchProductSize = async () => {
+      const res = await getProductSizes(productId);
+      if (res.status === 200) {
+        setProductSize(res.data);
+      }
+    };
+    fetchProductSize();
+  }, []);
   return (
     <Form form={form} onFinish={handleFinish} layout="vertical">
-      {/* Số lượng nhập vào */}
+      <Form.Item
+        name="size"
+        label="Size cần nhập"
+        rules={[
+          {
+            required: true,
+            message: "Please select the size!",
+          },
+        ]}
+      >
+        <Select placeholder="Size cần nhập">
+          {productSizes?.map((size) => (
+            <Option key={size._id} value={size._id}>
+              {size?.size}
+            </Option>
+          ))}
+        </Select>
+      </Form.Item>
       <Form.Item
         name="quantity"
         label="Số lượng"
@@ -54,30 +85,6 @@ const ProductQuantityForm = ({ initialValues, onSave, onCancel }) => {
         style={{ width: "100%" }} // Đảm bảo input chiếm hết chiều ngang
       >
         <Input placeholder="Nhập ghi chú (nếu có)" style={{ width: "100%" }} />
-      </Form.Item>
-
-      {/* Giá gốc */}
-      <Form.Item
-        name="originPrice"
-        label="Giá gốc"
-        rules={[
-          {
-            required: true,
-            message: "Vui lòng nhập giá gốc!",
-          },
-          {
-            type: "number",
-            min: 0,
-            message: "Giá gốc phải là một số dương!",
-          },
-        ]}
-        style={{ width: "100%" }} // Đảm bảo input chiếm hết chiều ngang
-      >
-        <InputNumber
-          placeholder="Nhập giá gốc"
-          min={0}
-          style={{ width: "100%" }}
-        />
       </Form.Item>
 
       {/* Lưu và hủy */}
