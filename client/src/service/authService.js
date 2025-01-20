@@ -12,9 +12,13 @@ const forgotPasswordApi = (formData) => {
 const resetPasswordApi = (formData) => {
   return instance.post("/reset-password", formData);
 };
+const confirmAccountApi = () => {
+  return instance.post("/confirm-account");
+};
 export {
   customerRegisterApi,
   customerLoginAPi,
   forgotPasswordApi,
   resetPasswordApi,
+  confirmAccountApi,
 };

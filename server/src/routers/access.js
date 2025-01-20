@@ -11,6 +11,11 @@ router.post("/register", asynchandler(accessController.singUp));
 router.post("/login", asynchandler(accessController.login));
 router.post("/forgot-password", asynchandler(accessController.forgotPassword));
 router.post(
+  "/confirm-account",
+  authentication,
+  asynchandler(accessController.confirmAccount)
+);
+router.post(
   "/reset-password",
   authentication,
   asynchandler(accessController.resetPassword)

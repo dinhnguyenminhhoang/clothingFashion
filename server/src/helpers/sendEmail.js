@@ -1,28 +1,21 @@
 const nodemailer = require("nodemailer");
+const process = require("process");
 
-// Cấu hình transporter (SMTP server)
 const transporter = nodemailer.createTransport({
-  service: "gmail", // Bạn có thể thay bằng dịch vụ khác (Outlook, Mailgun, ...)
+  service: "gmail",
   auth: {
-    user: "hoangdevfe@gmail.com", // Email của bạn
-    pass: "wbls qtcy lezi ligf", // Mật khẩu ứng dụng
+    user: process.env.YOUREMAIL,
+    pass: process.env.YOURAPPLICATIONPASSWORD,
   },
 });
 
-/**
- * Hàm gửi email tái sử dụng
- * @param {string} to - Email người nhận
- * @param {string} subject - Tiêu đề email
- * @param {string} html - Nội dung HTML của email
- * @returns {Promise<string>} - Trả về thông báo gửi email thành công hoặc lỗi
- */
 const sendEmail = async (to, subject, html) => {
   try {
     const mailOptions = {
-      from: "hoangdevfe@gmail.com", // Email người gửi
-      to, // Email người nhận
-      subject, // Tiêu đề email
-      html, // Nội dung email (dạng HTML)
+      from: `"no-reply" <${process.env.YOUREMAIL}>`,
+      to,
+      subject,
+      html,
     };
 
     await transporter.sendMail(mailOptions);

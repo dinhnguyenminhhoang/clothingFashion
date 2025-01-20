@@ -1,5 +1,5 @@
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
-import { Divider, Form, Input, Space, Typography } from "antd";
+import { Checkbox, Divider, Form, Input, Space, Typography } from "antd";
 import Cookies from "js-cookie";
 import React, { useState } from "react";
 import { useNavigate, useResolvedPath } from "react-router-dom";
@@ -59,9 +59,12 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-green-400 to-blue-600">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
-        <Title level={2} className="text-center text-blue-500 pb-6">
-          Đăng Nhập
-        </Title>
+        <div className="flex items-center justify-center flex-col">
+          <UserOutlined className="text-5xl" />
+          <Title level={2} className="text-center text-blue-500 pb-6 mt-1">
+            Đăng Nhập
+          </Title>
+        </div>
         <Form
           name="login"
           initialValues={{ remember: true }}
@@ -109,6 +112,18 @@ const Login = () => {
               placeholder="Mật khẩu"
             />
           </Form.Item>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-1 min-w-80">
+              <Checkbox />
+              Nhớ mật khẩu
+            </div>
+            <span
+              onClick={() => navigator("/forgot-password")}
+              className="text-end w-full flex justify-end text-blue-500 cursor-pointer underline"
+            >
+              Quên mật khẩu ?
+            </span>
+          </div>
           <Form.Item>
             <BtnLoading
               loading={loading}
@@ -120,7 +135,7 @@ const Login = () => {
           </Form.Item>
         </Form>
         <Divider>Hoặc</Divider>
-        <Space className="justify-center items-center w-full">
+        <Space className="items-center justify-center w-full">
           <Text className="text-center block">
             Chưa có tài khoản?{" "}
             <span
@@ -128,15 +143,6 @@ const Login = () => {
               className="text-blue-500 cursor-pointer underline"
             >
               Đăng ký ngay
-            </span>
-          </Text>
-          <Text className="text-center block">
-            Hoặc
-            <span
-              onClick={() => navigator("/forgot-password")}
-              className="text-blue-500 cursor-pointer underline ml-2"
-            >
-              Quên mật khẩu
             </span>
           </Text>
         </Space>

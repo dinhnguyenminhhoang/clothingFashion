@@ -21,7 +21,7 @@ const Register = () => {
         openNotification({
           type: "success",
           message: "Thông báo",
-          description: "Đăng kí thành công",
+          description: "Đăng kí thành công, Vui lòng kiểm tra email",
         });
         navigate("/login");
       } else {

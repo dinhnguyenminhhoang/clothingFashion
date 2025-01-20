@@ -1,7 +1,8 @@
 "use strict";
+const process = require("process");
 
 const mongoose = require("mongoose");
-const connectString = `mongodb+srv://datvminh07:SEljtn3fSoNadbd2@cluster0.qj9kf.mongodb.net/shopDb?retryWrites=true&w=majority&appName=Cluster0`;
+const connectString = process.env.CONECTSTRING;
 
 class Database {
   constructor() {
