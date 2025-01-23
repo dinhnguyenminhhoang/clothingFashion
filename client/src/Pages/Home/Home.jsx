@@ -2,18 +2,23 @@ import React, { useEffect, useState } from "react";
 import HomeHeroSlider from "../../Components/HomeHeroSlider/HomeHeroSlider";
 import ProductArea from "../../Components/ProductArea/ProductArea";
 import TitleResuable from "../../Components/TitleResuable/TitleResuable";
-import { getProductByType } from "../../service/productService";
+import {
+  getAllProduct,
+  getProductByType,
+  getProductRate,
+} from "../../service/productService";
 import ProductItem from "../../Components/ProductItem/ProductItem";
 
 const Home = () => {
-  const [productByType, setProductByType] = useState([]);
+  const [productRate, setProductRate] = useState([]);
   const [productByAo, setProductByAo] = useState([]);
+  const [productByQuan, setProductByQuan] = useState([]);
   useEffect(() => {
     const fetchProductByQuan = async () => {
       try {
         const res = await getProductByType("quần");
         if (res.status === 200) {
-          setProductByType(res.data);
+          setProductByQuan(res.data);
         }
       } catch (error) {}
     };
@@ -25,8 +30,17 @@ const Home = () => {
         }
       } catch (error) {}
     };
+    const fetchProductRate = async () => {
+      try {
+        const res = await getProductRate();
+        if (res.status === 200) {
+          setProductRate(res.data);
+        }
+      } catch (error) {}
+    };
     fetchProductByQuan();
     fetchProductByAo();
+    fetchProductRate();
   }, []);
   return (
     <>
@@ -40,7 +54,7 @@ const Home = () => {
         <div className="flex justify-center items-center">
           <div className="container">
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {productByType?.map((product) => (
+              {productRate?.map((product) => (
                 <ProductItem key={product._id} product={product} />
               ))}
             </div>
@@ -71,7 +85,7 @@ const Home = () => {
         <div className="flex justify-center items-center">
           <div className="container">
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {productByType?.map((product) => (
+              {productByQuan?.map((product) => (
                 <ProductItem key={product._id} product={product} />
               ))}
             </div>

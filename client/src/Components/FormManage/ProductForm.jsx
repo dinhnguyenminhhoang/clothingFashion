@@ -5,7 +5,6 @@ import UploadImage from "../UploadImage/UploadImage";
 import { getAllBrand } from "../../service/brandService";
 
 const ProductForm = ({ initialValues, onSave, onCancel }) => {
-  console.log("initialValues", initialValues);
   const [form] = Form.useForm();
   const [imageUrl, setImageUrl] = useState("");
   const [listBrand, setListBrand] = useState([]);
@@ -129,30 +128,6 @@ const ProductForm = ({ initialValues, onSave, onCancel }) => {
                   alignItems: "baseline",
                 }}
               >
-                {initialValues ? (
-                  <Form.Item
-                    {...field}
-                    name={[field.name, "_id"]}
-                    fieldKey={[field.fieldKey, "_id"]}
-                    label="_id"
-                    rules={[
-                      {
-                        required:
-                          initialValues.sizes &&
-                          initialValues.sizes[index] &&
-                          initialValues.sizes[index]._id, // Chỉ yêu cầu _id nếu có trong initialValues
-                        message: "Please input the _id!",
-                      },
-                    ]}
-                    style={{
-                      flex: 1,
-                      marginRight: "8px",
-                    }}
-                    className={"hidden"} // Ẩn _id nếu không có
-                  >
-                    <Input />
-                  </Form.Item>
-                ) : null}
                 <Form.Item
                   {...field}
                   name={[field.name, "size"]}

@@ -247,6 +247,7 @@ const OrderHistory = () => {
               <div>
                 <h3 className="text-lg font-semibold">Đánh giá (1-5 sao):</h3>
                 <Rate
+                  allowHalf
                   value={reviewRating}
                   onChange={(value) => setReviewRating(value)}
                 />

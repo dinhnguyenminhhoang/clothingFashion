@@ -164,7 +164,7 @@ class ProductService {
 
       return {
         ...product.toObject(),
-        rating: averageRating,
+        avgReview: averageRating,
       };
     });
 

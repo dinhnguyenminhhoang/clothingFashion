@@ -3,13 +3,20 @@ import instance from "../config/instance";
 const getProductByType = (type, limit) => {
   return instance.get(`/product-type/${type}`, { params: { limit } });
 };
-const getAllProduct = ({ page = 1, limit = 6, searchText, filters = {} }) => {
+const getAllProduct = ({
+  page = 1,
+  limit = 6,
+  searchText,
+  filters = {},
+  sort = {},
+}) => {
   // Tạo một đối tượng với các giá trị cần thiết
   const params = {
     page,
     limit,
     ...(searchText ? { searchText } : {}), // Thêm searchText nếu có giá trị
     ...filters, // Gộp thêm các bộ lọc
+    ...sort,
   };
 
   // Lọc bỏ các giá trị undefined hoặc null
@@ -43,6 +50,9 @@ const getProductQuantity = (productId) => {
 const getProductSizes = (productId) => {
   return instance.get(`/product-size/${productId}`);
 };
+const getProductRate = () => {
+  return instance.get("/product-top-rate");
+};
 const createProductQuantity = (productId, formData) => {
   return instance.post(`/product-quantity/${productId}`, formData);
 };
@@ -60,4 +70,5 @@ export {
   createProductQuantity,
   updateProductQuantity,
   getProductSizes,
+  getProductRate,
 };

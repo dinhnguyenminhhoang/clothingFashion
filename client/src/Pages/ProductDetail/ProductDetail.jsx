@@ -22,7 +22,9 @@ const ProductDetail = () => {
       const res = await getProductDetail(productId);
       if (res.status === 200) {
         setProductDetail(res.data);
-        setSelectedSize(res.data?.sizes?.[0]?.size);
+        setSelectedSize(
+          res.data?.sizes?.find((size) => size.quantity > 0)?.size
+        );
       }
     };
 

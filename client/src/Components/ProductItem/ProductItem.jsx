@@ -10,7 +10,9 @@ const ProductItem = ({ product }) => {
   const { _id, img, title, price, avgReview, reviews, status, sizes } =
     product || {};
 
-  const [selectedSize, setSelectedSize] = useState(sizes?.[0]?.size);
+  const [selectedSize, setSelectedSize] = useState(
+    sizes?.find((size) => size.quantity > 0)?.size
+  );
 
   const handleSizeClick = (size) => {
     setSelectedSize(size);
@@ -22,7 +24,9 @@ const ProductItem = ({ product }) => {
       return;
     }
 
-    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const cart = localStorage.getItem("cart")
+      ? JSON.parse(localStorage.getItem("cart"))
+      : [];
 
     // Kiểm tra sản phẩm đã tồn tại trong giỏ hàng chưa
     const productIndex = cart.findIndex(

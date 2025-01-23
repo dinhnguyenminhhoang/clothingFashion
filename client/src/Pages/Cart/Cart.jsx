@@ -275,6 +275,7 @@ const Cart = () => {
       </Modal>
 
       <Modal
+        className="min-w-[800px]"
         title="Thông Tin Giao Hàng"
         visible={showDeliveryForm}
         onCancel={() => setShowDeliveryForm(false)}
