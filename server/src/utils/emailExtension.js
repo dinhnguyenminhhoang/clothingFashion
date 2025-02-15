@@ -148,6 +148,36 @@ const confirmAccountForm = (confirmLink) => {
       `,
   };
 };
+const receiveReportEmailForm = (name, phone, subject, message) => {
+  return {
+    title: `${subject} - ${name} - ${phone}`,
+    body: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h1 style="color: #4CAF50; text-align: center;">Thông tin khách hàng báo cáo!</h1>
+          <p>${message}</p>
+        </div>
+      `,
+  };
+};
+const replyReportEmailForm = (customerName, reportTitle, replyMessage) => {
+  return {
+    title: `Phản hồi: ${reportTitle} - ${customerName}`,
+    body: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; padding: 20px;">
+        <h2 style="color: #4CAF50; text-align: center;">Phản hồi từ bộ phận hỗ trợ</h2>
+        <p>Chào <strong>${customerName}</strong>,</p>
+        <p>Cảm ơn bạn đã liên hệ với chúng tôi về vấn đề "<strong>${reportTitle}</strong>".</p>
+        <p>Dưới đây là phản hồi của chúng tôi:</p>
+        <blockquote style="border-left: 4px solid #4CAF50; padding-left: 10px; color: #555;">
+          ${replyMessage}
+        </blockquote>
+        <p>Nếu bạn cần hỗ trợ thêm, vui lòng liên hệ lại với chúng tôi.</p>
+        <p>Trân trọng,</p>
+        <p><strong>Đội ngũ Hỗ trợ Khách hàng</strong></p>
+      </div>
+    `,
+  };
+};
 
 module.exports = {
   confirmOrderForm,
@@ -156,4 +186,6 @@ module.exports = {
   cancelOrderForm,
   resetPasswordForm,
   confirmAccountForm,
+  receiveReportEmailForm,
+  replyReportEmailForm,
 };

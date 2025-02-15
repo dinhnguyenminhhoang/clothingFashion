@@ -69,7 +69,7 @@ const OrderDetail = ({ selectedOrder, isModalVisible, handleCancel }) => {
                   <strong>Phương thức thanh toán:</strong>{" "}
                   {selectedOrder.paymentMethod === "cash"
                     ? "Thanh toán khi nhận hàng"
-                    : "Đã thanh toán qua thẻ"}
+                    : "Thanh toán qua thẻ"}
                 </p>
                 <p>
                   <strong>Trạng thái:</strong>

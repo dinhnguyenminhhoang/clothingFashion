@@ -22,7 +22,7 @@ class OrderController {
   };
   getAllOrder = async (req, res, next) => {
     new SuccessResponse({
-      data: await OrderService.getAllOrder(req.user),
+      data: await OrderService.getAllOrder(req.query),
     }).send(res);
   };
   adminUpdateStatus = async (req, res, next) => {

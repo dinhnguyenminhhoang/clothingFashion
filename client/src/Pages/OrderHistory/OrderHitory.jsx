@@ -68,7 +68,7 @@ const OrderHistory = () => {
       dataIndex: "paymentMethod",
       key: "paymentMethod",
       render: (text) =>
-        text === "cash" ? "Thanh toán khi nhận hàng" : "Đã thanh toán qua thẻ",
+        text === "cash" ? "Thanh toán khi nhận hàng" : "Thanh toán qua thẻ",
     },
     {
       title: "Trạng thái",

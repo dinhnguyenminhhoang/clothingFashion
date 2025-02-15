@@ -8,6 +8,7 @@ import {
   ShoppingCartOutlined,
   TagOutlined,
   LogoutOutlined,
+  ContactsFilled,
 } from "@ant-design/icons";
 import Cookies from "js-cookie";
 
@@ -60,6 +61,13 @@ const AdminSidebar = () => {
         </Menu.Item>
         <Menu.Item
           key="6"
+          icon={<ContactsFilled />}
+          className="hover:bg-gray-100 py-6 text-lg"
+        >
+          <Link to="/manager-contact">Quản lý Liên hệ</Link>
+        </Menu.Item>
+        <Menu.Item
+          key="7"
           icon={<LogoutOutlined />}
           className="hover:bg-gray-100 py-6 text-lg"
         >

@@ -25,6 +25,7 @@ import Shop from "./Pages/Shop/Shop";
 import ForgotPassword from "./Pages/Auth/ForgotPassword/ForgotPassword";
 import ResetPassword from "./Pages/Auth/ResetPassword/ResetPassword";
 import ConfirmAccoount from "./Pages/Auth/ConfirmAccount/ConfirmAccoount";
+import ManagerContact from "./Pages/admin/ManagerContact/ManagerContact";
 const App = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
@@ -52,6 +53,7 @@ const App = () => {
           <Route path="/manager-product" element={<ManagerProduct />} />
           <Route path="/manager-order" element={<ManagerOrder />} />
           <Route path="/manager-brand" element={<ManagerBrand />} />
+          <Route path="/manager-contact" element={<ManagerContact />} />
           <Route
             path="/manager-quantity/:productId"
             element={<ManagerQuantityProduct />}

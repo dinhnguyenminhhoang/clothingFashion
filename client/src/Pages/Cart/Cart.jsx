@@ -11,19 +11,20 @@ import {
 } from "@ant-design/icons";
 import { formatCurrencyVND } from "../../utils";
 import { useNavigate } from "react-router-dom";
-import { createOrder } from "../../service/orderService";
+import { createOrder, userUpdateStatus } from "../../service/orderService";
 import { Elements } from "@stripe/react-stripe-js";
 import { IMAGEURL, stripeKey } from "../../utils/constant";
 import { loadStripe } from "@stripe/stripe-js";
 import useNotification from "../../hooks/NotiHook";
+import QrCodeForm from "../../Components/FormManage/QrCodeForm";
 const stripePromise = loadStripe(stripeKey);
 
 const Cart = () => {
   const [cart, setCart] = useState([]);
   const openNotification = useNotification();
-  const [userInfo, setUserInfo] = useState();
   const [showDeliveryForm, setShowDeliveryForm] = useState(false);
-  const [showStripeModal, setShowStripeModal] = useState(false);
+  const [showQrModal, setShowQRModal] = useState(false);
+  const [draftOrder, setDraftOrder] = useState(false);
   const [deliveryInfo, setDeliveryInfo] = useState({
     address: "",
     recipientName: "",
@@ -38,9 +39,6 @@ const Cart = () => {
     const user = localStorage.getItem("user");
     if (savedCart) {
       setCart(JSON.parse(savedCart));
-    }
-    if (user) {
-      setUserInfo(JSON.parse(user));
     }
   }, []);
 
@@ -111,7 +109,8 @@ const Cart = () => {
           navigator("/history-order");
         }
       } else if (paymentMethod === "credit") {
-        setShowStripeModal();
+        setDraftOrder(res.data);
+        setShowQRModal(true);
       }
     } catch (error) {
       openNotification({
@@ -122,6 +121,28 @@ const Cart = () => {
     } finally {
       setShowPaymentModal(false);
     }
+  };
+  const handleCancelPaymentOnline = async () => {
+    try {
+      const res = await userUpdateStatus({ status: "cancel" }, draftOrder?._id);
+      if (res) {
+        setDraftOrder(null);
+        setShowQRModal(false);
+        openNotification({
+          typpe: "error",
+          message: "Thông báo",
+          description: "Đơn hàng đã bị hủy",
+        });
+      }
+    } catch (error) {}
+  };
+  const handleConfirmPaymentQrCode = () => {
+    openNotification({
+      message: "Thông báo",
+      description: "Đặt hàng thành công",
+    });
+    localStorage.removeItem("cart");
+    navigator("/history-order");
   };
   return (
     <div className="container mx-auto p-4">
@@ -222,6 +243,25 @@ const Cart = () => {
           Bạn không có sản phẩm nào trong giỏ hàng
         </span>
       )}
+      {showQrModal ? (
+        <Modal
+          visible={showQrModal}
+          onCancel={handleCancelPaymentOnline}
+          footer={[
+            <Button type="primary" danger onClick={handleCancelPaymentOnline}>
+              Hủy
+            </Button>,
+            <Button type="primary" onClick={handleConfirmPaymentQrCode}>
+              Xác nhận thanh toán
+            </Button>,
+          ]}
+        >
+          <QrCodeForm
+            draftOrder={draftOrder}
+            onCancel={handleCancelPaymentOnline}
+          />
+        </Modal>
+      ) : null}
 
       <Modal
         visible={showPaymentModal}
@@ -257,20 +297,20 @@ const Cart = () => {
             ) : null}
             Thanh Toán Khi Giao Hàng
           </Button>
-          {/* <Button
-              className={`py-5 relative ${
-                paymentMethod === "credit"
-                  ? "border-green-600 border text-green-600"
-                  : ""
-              }`}
-              icon={<CreditCardOutlined />}
-              onClick={() => setPaymentMethod("credit")}
-            >
-              {paymentMethod === "credit" ? (
-                <CheckCircleOutlined className="absolute top-1 right-2 text-green-700" />
-              ) : null}
-              Thanh Toán Qua Stripe
-            </Button> */}
+          <Button
+            className={`py-5 relative ${
+              paymentMethod === "credit"
+                ? "border-green-600 border text-green-600"
+                : ""
+            }`}
+            icon={<CreditCardOutlined />}
+            onClick={() => setPaymentMethod("credit")}
+          >
+            {paymentMethod === "credit" ? (
+              <CheckCircleOutlined className="absolute top-1 right-2 text-green-700" />
+            ) : null}
+            Thanh Toán Qua Qr code
+          </Button>
         </div>
       </Modal>
 

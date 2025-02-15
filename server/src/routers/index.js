@@ -11,5 +11,6 @@ router.use(`/v1/api`, require("./user"));
 router.use(`/v1/api`, require("./order"));
 router.use(`/v1/api`, require("./summary"));
 router.use(`/v1/api`, require("./upload"));
+router.use(`/v1/api`, require("./report"));
 
 module.exports = router;
