@@ -2,7 +2,7 @@ import axios from "axios";
 import Cookie from "js-cookie";
 
 const instance = axios.create({
-  baseURL: "http://localhost:3055/v1/api",
+  baseURL: import.meta.env.SERVER_BASE_URL,
 });
 
 instance.interceptors.request.use(

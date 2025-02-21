@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import qrcodeImg from "../../assets/img/payment/bc1eef4b-376d-4287-9d46-448535a6ad09.jpeg";
 
 const QrCodeForm = ({ onCancel, draftOrder }) => {
-  const [timeLeft, setTimeLeft] = useState(300); // 4 phút (240 giây)
+  const [timeLeft, setTimeLeft] = useState(240);
 
   useEffect(() => {
     if (timeLeft <= 0) {
-      onCancel(); // Gọi hàm hủy khi hết thời gian
+      onCancel();
       return;
     }
 
@@ -28,15 +28,24 @@ const QrCodeForm = ({ onCancel, draftOrder }) => {
     <div className="p-6">
       <div className="flex flex-col items-center justify-center gap-2 w-full mb-4">
         <p className="font-bold text-2xl">Vui lòng thanh toán và xác nhận</p>
-        <p className="text-base text-red-400 font-bold">
-          Nội dung thanh toán: DH_{draftOrder?._id}
-        </p>
+
         <p className="text-lg text-gray-600 font-semibold">
           Thời gian còn lại:{" "}
           <span className="text-red-500 font-bold">{formatTime(timeLeft)}</span>
         </p>
       </div>
       <img src={qrcodeImg} alt="QR Code" />
+      <div className="mt-4 flex flex-col items-center gap-2 mb-4">
+        <p className="text-xl">
+          Chủ tài khoản: <strong>VU MINH DAT</strong>
+        </p>
+        <p className="text-base text-red-400 font-bold">
+          Nội dung thanh toán: DH_{draftOrder?._id}
+        </p>
+        <p className="text-xl">
+          Số tài khoản: <strong>060273634013</strong>
+        </p>
+      </div>
     </div>
   );
 };
