@@ -11,6 +11,7 @@ import {
   ContactsFilled,
 } from "@ant-design/icons";
 import Cookies from "js-cookie";
+import { MdCategory, MdCollections } from "react-icons/md";
 
 const { Sider } = Layout;
 
@@ -58,6 +59,13 @@ const AdminSidebar = () => {
           className="hover:bg-gray-100 py-6 text-lg"
         >
           <Link to="/manager-brand">Quản lý thương hiệu</Link>
+        </Menu.Item>
+        <Menu.Item
+          key="8"
+          icon={<MdCategory />}
+          className="hover:bg-gray-100 py-6 text-lg"
+        >
+          <Link to="/manager-category">Quản lý thể loại</Link>
         </Menu.Item>
         <Menu.Item
           key="6"

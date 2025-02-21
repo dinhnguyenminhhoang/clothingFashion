@@ -41,6 +41,13 @@ const Navbar = () => {
       fetchData();
     }
   }, [debouncedSearchText]);
+  const handleSearch = () => {
+    if (searchText.trim()) {
+      navigator(`/shop?search=${encodeURIComponent(searchText.trim())}`);
+      setSearchText("");
+    }
+  };
+
   const userMenu = (
     <Menu className="w-40">
       <Menu.Item onClick={() => navigator("/profile")}>
@@ -105,8 +112,12 @@ const Navbar = () => {
             onChange={(e) => setSearchText(e.target.value)}
             className="rounded-l-full flex-1 max-w-lg border-slate-900 border py-[6px] px-4"
             placeholder="Tìm kiếm sản phẩm..."
+            onPressEnter={handleSearch}
           />
-          <Button className="rounded-none rounded-r-full border-slate-900 border py-[17px]">
+          <Button
+            onClick={handleSearch}
+            className="rounded-none rounded-r-full border-slate-900 border py-[17px]"
+          >
             <SearchOutlined className="text-xl" />
           </Button>
           {searchText.trim() ? (

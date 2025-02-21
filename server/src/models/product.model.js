@@ -27,11 +27,6 @@ const productSchema = new Schema(
       default: 0,
       min: [0, "Product quantity can't be negative"],
     },
-    productType: {
-      type: String,
-      required: true,
-      lowercase: true,
-    },
     description: {
       type: String,
       required: true,
@@ -75,6 +70,10 @@ const productSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Brand",
       required: true,
+    },
+    category: {
+      type: Schema.Types.ObjectId,
+      ref: "Category",
     },
     status: {
       type: String,

@@ -1,15 +1,15 @@
 "use strict";
 //
 const { model, Schema } = require("mongoose");
-const DOCUMENT_NAME = "Collection";
-const COLLECTION_NAME = "Collections";
+const DOCUMENT_NAME = "Category";
+const COLLECTION_NAME = "Categories";
 
-const collectionSchema = new Schema(
+const categoriesSchema = new Schema(
   {
     name: {
       type: String,
       trim: true,
-      required: [true, "Please provide a collection name"],
+      required: [true, "Please provide a category name"],
       maxLength: 100,
       unique: true,
     },
@@ -33,5 +33,5 @@ const collectionSchema = new Schema(
 );
 
 module.exports = {
-  Collection: model(DOCUMENT_NAME, collectionSchema),
+  Category: model(DOCUMENT_NAME, categoriesSchema),
 };

@@ -3,11 +3,13 @@ import { Button, Form, Input, message, Select } from "antd";
 import React, { useEffect, useState } from "react";
 import UploadImage from "../UploadImage/UploadImage";
 import { getAllBrand } from "../../service/brandService";
+import { getAllCategory } from "../../service/categoryService";
 
 const ProductForm = ({ initialValues, onSave, onCancel }) => {
   const [form] = Form.useForm();
   const [imageUrl, setImageUrl] = useState("");
   const [listBrand, setListBrand] = useState([]);
+  const [listCategory, setListCategory] = useState([]);
   useEffect(() => {
     form.resetFields();
     if (initialValues) {
@@ -24,6 +26,7 @@ const ProductForm = ({ initialValues, onSave, onCancel }) => {
         description: initialValues.description,
         img: initialValues.img,
         brand: initialValues.brand._id,
+        category: initialValues.category?._id || null,
         sizes: formattedSizes,
       });
       setImageUrl(initialValues.img);
@@ -44,7 +47,14 @@ const ProductForm = ({ initialValues, onSave, onCancel }) => {
         setListBrand(res.data.data);
       }
     };
+    const fetchDataCategory = async () => {
+      const res = await getAllCategory({ limit: 1000, page: 1 });
+      if (res.status === 200) {
+        setListCategory(res.data.data);
+      }
+    };
     fetchData();
+    fetchDataCategory();
   }, []);
   return (
     <Form form={form} onFinish={handleFinish} layout="vertical">
@@ -103,18 +113,21 @@ const ProductForm = ({ initialValues, onSave, onCancel }) => {
         </Select>
       </Form.Item>
       <Form.Item
-        name="productType"
+        name="category"
         label="Thể loại"
         rules={[
           {
             required: true,
-            message: "Please select the product type!",
+            message: "Please select the brand!",
           },
         ]}
       >
         <Select>
-          <Option value="quần">Quần</Option>
-          <Option value="áo">Áo</Option>
+          {listCategory?.map((category) => (
+            <Option key={category._id} value={category._id}>
+              {category?.name}
+            </Option>
+          ))}
         </Select>
       </Form.Item>
       <Form.List name="sizes">

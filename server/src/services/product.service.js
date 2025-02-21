@@ -5,21 +5,28 @@ const { Brand } = require("../models/brand.model");
 const { Product } = require("../models/product.model");
 const { paginate } = require("../utils/paginate");
 const { NotFoundError } = require("../core/error.response");
+const { Category } = require("../models/category.model");
 
 class ProductService {
   static createNewProduct = async (data) => {
     const product = await Product.create(data);
-    const { _id: productId, brand } = product;
+    const { _id: productId, brand, category } = product;
     const brandId = new mongoose.Types.ObjectId(brand);
+    const categoryId = new mongoose.Types.ObjectId(category);
     await Brand.updateOne({ _id: brandId }, { $push: { products: productId } });
+    await Category.updateOne(
+      { _id: categoryId },
+      { $push: { products: productId } }
+    );
     return product;
   };
   static updateProduct = async (productId, data) => {
     const existingProduct = await Product.findById(productId);
     if (!existingProduct) throw new Error("Product not found.");
     const newBrandId = new mongoose.Types.ObjectId(data.brand);
+    const newCategoryId = new mongoose.Types.ObjectId(data.category);
     const productObjectId = new mongoose.Types.ObjectId(productId);
-    if (newBrandId !== existingProduct.brand) {
+    if (!existingProduct.brand.equals(newBrandId)) {
       const oldBrandId = new mongoose.Types.ObjectId(existingProduct.brand);
       await Brand.updateOne(
         { _id: oldBrandId },
@@ -27,6 +34,21 @@ class ProductService {
       );
       await Brand.updateOne(
         { _id: newBrandId },
+        { $push: { products: productObjectId } }
+      );
+    }
+
+    // Kiểm tra và cập nhật category nếu thay đổi
+    if (!existingProduct.category.equals(newCategoryId)) {
+      const oldCategoryId = new mongoose.Types.ObjectId(
+        existingProduct.category
+      );
+      await Category.updateOne(
+        { _id: oldCategoryId },
+        { $pull: { products: productObjectId } }
+      );
+      await Category.updateOne(
+        { _id: newCategoryId },
         { $push: { products: productObjectId } }
       );
     }
@@ -50,24 +72,24 @@ class ProductService {
       sortBy,
       priceRange,
       status,
-      categories: productType,
       filters = { productStatus: "active" },
       searchText,
+      category,
     } = query;
-
+    console.log("query", query);
     if (priceRange) {
       const [minPrice, maxPrice] = priceRange.split(",").map(Number);
       filters.price = { $gte: minPrice, $lte: maxPrice };
     }
-
+    if (category) {
+      const categoryArray = category
+        .split(",")
+        .map((id) => new mongoose.Types.ObjectId(id));
+      filters.category = { $in: categoryArray };
+    }
     if (status) {
       const stockArray = status.split(",");
       filters.status = { $in: stockArray };
-    }
-
-    if (productType) {
-      const categoryArray = productType.split(",");
-      filters.productType = { $in: categoryArray };
     }
     const options = {};
     if (sortBy) {
@@ -78,7 +100,7 @@ class ProductService {
     }
     let products = await paginate({
       model: Product,
-      populate: ["reviews", "brand"],
+      populate: ["reviews", "brand", "category"],
       limit: +limit,
       page: +page,
       filters,
@@ -127,12 +149,28 @@ class ProductService {
   };
   static getProductType = async (type, query) => {
     const { limit } = query;
+    console.log("type", type);
+    // Tìm category có name chứa type
+    const categories = await Category.find({
+      name: { $regex: type, $options: "i" },
+    });
+
+    if (!categories.length) {
+      return []; // Không tìm thấy danh mục nào phù hợp
+    }
+
+    // Lấy danh sách categoryId
+    const categoryIds = categories.map((category) => category._id);
+
+    // Tìm sản phẩm theo categoryId
     let products = await Product.find({
-      productType: type,
+      category: { $in: categoryIds },
       productStatus: "active",
     })
       .populate("reviews")
       .limit(limit || 8);
+
+    // Tính trung bình đánh giá
     products = products.map((product) => {
       const avgReview =
         product.reviews.length > 0

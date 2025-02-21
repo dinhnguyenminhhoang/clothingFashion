@@ -129,9 +129,9 @@ const ManagerProduct = () => {
     },
     {
       title: "Thể loại",
-      dataIndex: "productType",
-      key: "productType",
-      render: (type) => <span>{type}</span>,
+      dataIndex: "category",
+      key: "category",
+      render: (category) => <span>{category?.name}</span>,
     },
     {
       title: "Mô tả",
@@ -268,20 +268,22 @@ const ManagerProduct = () => {
           onShowSizeChange={(current, size) => fetchData(current, size)}
         />
       </div>
-      <Modal
-        title={
-          editProduct ? "Chỉnh sửa thông tin sản phẩm" : "Thêm mới sản phẩm"
-        }
-        visible={isShowModal}
-        footer={null}
-        onCancel={() => setIsShowModal(false)}
-      >
-        <ProductForm
-          initialValues={editProduct ? editProduct : null}
-          onSave={handleSave}
+      {isShowModal ? (
+        <Modal
+          title={
+            editProduct ? "Chỉnh sửa thông tin sản phẩm" : "Thêm mới sản phẩm"
+          }
+          visible={isShowModal}
+          footer={null}
           onCancel={() => setIsShowModal(false)}
-        />
-      </Modal>
+        >
+          <ProductForm
+            initialValues={editProduct ? editProduct : null}
+            onSave={handleSave}
+            onCancel={() => setIsShowModal(false)}
+          />
+        </Modal>
+      ) : null}
     </div>
   );
 };
