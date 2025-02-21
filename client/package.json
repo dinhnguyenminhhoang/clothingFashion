@@ -17,7 +17,6 @@
     "axios": "^1.7.2",
     "dotenv": "^16.4.7",
     "firebase": "^10.12.4",
-    "formik": "^2.4.6",
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "leaflet": "^1.9.4",
