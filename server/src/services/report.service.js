@@ -18,6 +18,8 @@ class ReportService {
       title,
       content
     );
+    console.log("process.env.YOUREMAIL",process.env.YOUREMAIL)
+    console.log("run....")
     await sendEmail(
       process.env.YOUREMAIL,
       reecentReportEmail.title,

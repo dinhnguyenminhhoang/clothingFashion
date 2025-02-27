@@ -1,9 +1,10 @@
-import { ArrowRightOutlined, RightCircleFilled } from "@ant-design/icons";
+import { ArrowRightOutlined } from "@ant-design/icons";
 import { Button } from "antd";
 import React from "react";
 import quanImg from "../../assets/img/collecttion/quan.png";
 import aoImg from "../../assets/img/collecttion/ao.png";
 import { useNavigate } from "react-router-dom";
+
 const collection = [
   {
     id: 1,
@@ -26,15 +27,16 @@ const ProductArea = () => {
       {collection.map((item) => (
         <div
           key={item.id}
-          className={`p-10  rounded-md flex-1 flex justify-between items-center`}
+          className="p-10 rounded-md flex-1 flex justify-between items-center"
           style={{ background: item.bg }}
         >
           <div className="flex flex-col justify-center gap-4">
             <span className="text-2xl font-bold">{item.title}</span>
             <Button
               icon={<ArrowRightOutlined />}
-              onClick={() => navigator("/shop")}
-              iconPosition="end"
+              onClick={() =>
+                navigator(`/shop?categories=${item.title.toLowerCase()}`)
+              }
               className="bg-transparent border border-slate-900 w-52"
             >
               MUA NGAY!

@@ -130,6 +130,7 @@ class ProductService {
     const product = await Product.findOne({ _id: productId }).populate([
       "reviews",
       "brand",
+      "category",
     ]);
 
     if (!product) {

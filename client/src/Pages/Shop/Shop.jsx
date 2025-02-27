@@ -26,6 +26,7 @@ const Shop = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const searchText = searchParams.get("search");
+  const categoryText = searchParams.get("categories");
   const fetchProducts = async () => {
     try {
       const res = await getAllProduct({
@@ -66,8 +67,31 @@ const Shop = () => {
         searchText: "",
       }));
     }
-    fetchAllCategories();
   }, [searchText]);
+
+  useEffect(() => {
+    if (categoryText && categories.length > 0) {
+      const matchedCategory = categories.find((cate) =>
+        new RegExp(`^${categoryText}$`, "i").test(cate.name)
+      );
+
+      if (matchedCategory) {
+        setFilters((prev) => ({
+          ...prev,
+          category: [matchedCategory._id],
+        }));
+      } else {
+        setFilters((prev) => ({
+          ...prev,
+          category: [],
+        }));
+      }
+    }
+  }, [categoryText, categories]); // Tách riêng hiệu ứng này để đảm bảo nó chạy khi categories đã có dữ liệu
+
+  useEffect(() => {
+    fetchAllCategories();
+  }, []);
   useEffect(() => {
     fetchProducts();
   }, [filters, pagi.page, pagi.limit]);
@@ -185,6 +209,7 @@ const Shop = () => {
                   >
                     <input
                       type="checkbox"
+                      checked={filters.category.includes(category._id)}
                       onChange={() => handleCategoryChange(category._id)}
                     />
                     <label className="ml-2">{category.name}</label>

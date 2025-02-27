@@ -32,7 +32,7 @@ const ProductDetail = () => {
   }, [productId]);
   useEffect(() => {
     const fetchProductRelated = async () => {
-      const res = await getProductByType(productDetail.productType, 4);
+      const res = await getProductByType(productDetail?.category?.name, 4);
       if (res.status === 200) {
         setProductRelated(res.data);
       }
