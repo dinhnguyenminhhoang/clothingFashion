@@ -11,7 +11,7 @@ import {
   ContactsFilled,
 } from "@ant-design/icons";
 import Cookies from "js-cookie";
-import { MdCategory, MdCollections } from "react-icons/md";
+import { MdCategory, MdChatBubbleOutline, MdCollections } from "react-icons/md";
 
 const { Sider } = Layout;
 
@@ -73,6 +73,13 @@ const AdminSidebar = () => {
           className="hover:bg-gray-100 py-6 text-lg"
         >
           <Link to="/manager-contact">Quản lý Liên hệ</Link>
+        </Menu.Item>
+        <Menu.Item
+          key="9"
+          icon={<MdChatBubbleOutline />}
+          className="hover:bg-gray-100 py-6 text-lg"
+        >
+          <Link to="/manager-chatbot">Quản lý chatbot</Link>
         </Menu.Item>
         <Menu.Item
           key="7"
