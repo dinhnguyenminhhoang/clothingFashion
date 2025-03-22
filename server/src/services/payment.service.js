@@ -1,49 +1,63 @@
 "use strict";
 
-const { createChecksum } = require("../utils");
-
+const { createChecksum, sortObject } = require("../utils");
+const moment = require("moment");
 class PaymentService {
   static payment = async (req) => {
-    const orderInfo = req.body.orderInfo;
-    const orderType = req.body.orderType;
-    const amount = req.body.amount;
-    const bankCode = req.body.bankCode;
-    const language = req.body.language || "vn";
-    const ipAddr =
-      req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+    process.env.TZ = "Asia/Ho_Chi_Minh";
 
-    const date = new Date();
-    const createDate = `${date.getFullYear()}${(date.getMonth() + 1)
-      .toString()
-      .padStart(2, "0")}${date.getDate().toString().padStart(2, "0")}${date
-      .getHours()
-      .toString()
-      .padStart(2, "0")}${date.getMinutes().toString().padStart(2, "0")}${date
-      .getSeconds()
-      .toString()
-      .padStart(2, "0")}`;
+    let date = new Date();
+    let createDate = moment(date).format("YYYYMMDDHHmmss");
 
-    const vnp_Params = {
-      vnp_Version: "2.1.0",
-      vnp_Command: "pay",
-      vnp_TmnCode: process.env.VNP_TMNCODE,
-      vnp_Amount: amount * 100,
-      vnp_CreateDate: createDate,
-      vnp_CurrCode: "VND",
-      vnp_IpAddr: ipAddr,
-      vnp_Locale: language,
-      vnp_OrderInfo: orderInfo,
-      vnp_OrderType: orderType,
-      vnp_ReturnUrl: "http://localhost:3000/vnpay_return",
-      vnp_TxnRef: Math.floor(Math.random() * 1000000000).toString(),
-      vnp_BankCode: bankCode,
-    };
+    let ipAddr =
+      req.headers["x-forwarded-for"] ||
+      req.connection.remoteAddress ||
+      req.socket.remoteAddress ||
+      req.connection.socket.remoteAddress;
 
-    vnp_Params["vnp_SecureHash"] = createChecksum(vnp_Params);
+    let config = require("../config/default.json");
 
-    return `${process.env.VNP_URL}?${new URLSearchParams(
-      vnp_Params
-    ).toString()}`;
+    let tmnCode = config.vnp_TmnCode;
+    let secretKey = config.vnp_HashSecret;
+    let vnpUrl = config.vnp_Url;
+    let returnUrl = config.vnp_ReturnUrl;
+    let orderId = moment(date).format("DDHHmmss");
+    let amount = req.body.amount;
+    let bankCode = req.body.bankCode;
+
+    let locale = req.body.language;
+    if (locale === null || locale === "") {
+      locale = "vn";
+    }
+    let currCode = "VND";
+    let vnp_Params = {};
+    vnp_Params["vnp_Version"] = "2.1.0";
+    vnp_Params["vnp_Command"] = "pay";
+    vnp_Params["vnp_TmnCode"] = tmnCode;
+    vnp_Params["vnp_Locale"] = locale;
+    vnp_Params["vnp_CurrCode"] = currCode;
+    vnp_Params["vnp_TxnRef"] = orderId;
+    vnp_Params["vnp_OrderInfo"] = "Thanh toan cho ma GD:" + orderId;
+    vnp_Params["vnp_OrderType"] = "other";
+    vnp_Params["vnp_Amount"] = amount * 100;
+    vnp_Params["vnp_ReturnUrl"] = returnUrl;
+    vnp_Params["vnp_IpAddr"] = ipAddr;
+    vnp_Params["vnp_CreateDate"] = createDate;
+    if (bankCode !== null && bankCode !== "") {
+      vnp_Params["vnp_BankCode"] = bankCode;
+    }
+
+    vnp_Params = sortObject(vnp_Params);
+
+    let querystring = require("qs");
+    let signData = querystring.stringify(vnp_Params, { encode: false });
+    let crypto = require("crypto");
+    let hmac = crypto.createHmac("sha512", secretKey);
+    let signed = hmac.update(new Buffer(signData, "utf-8")).digest("hex");
+    vnp_Params["vnp_SecureHash"] = signed;
+    vnpUrl += "?" + querystring.stringify(vnp_Params, { encode: false });
+
+    return vnpUrl;
   };
 }
 module.exports = PaymentService;
