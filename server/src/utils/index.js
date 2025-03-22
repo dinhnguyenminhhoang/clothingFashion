@@ -1,5 +1,6 @@
 "use strict";
 const _ = require("lodash");
+const crypto = require("crypto");
 const { Types } = require("mongoose");
 const getInfoData = ({ fill = [], object = {} }) => {
   return _.pick(object, fill);
@@ -34,6 +35,16 @@ const updateNestedObjectParser = (obj) => {
   return final;
 };
 const covertObjectIdMoongoDb = (id) => new Types.ObjectId(id);
+function createChecksum(params) {
+  const signData = Object.keys(params)
+    .sort()
+    .map((key) => `${key}=${params[key]}`)
+    .join("&");
+  return crypto
+    .createHmac("sha512", process.env.VNP_HASHSECRET)
+    .update(signData)
+    .digest("hex");
+}
 module.exports = {
   getInfoData,
   getSelectData,
@@ -41,4 +52,5 @@ module.exports = {
   removeUndefinedObject,
   updateNestedObjectParser,
   covertObjectIdMoongoDb,
+  createChecksum,
 };
