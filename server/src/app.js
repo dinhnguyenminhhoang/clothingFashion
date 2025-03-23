@@ -17,9 +17,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const corsOptions = {
-  origin: "*", // Thêm các URL frontend tùy thuộc vào môi trường
+  origin: [process.env.BASE_URL_CLIENT],
 };
-
 app.use(cors(corsOptions));
 require("./dbs/init.mongodb");
 //init router
