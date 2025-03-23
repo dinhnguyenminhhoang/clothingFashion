@@ -21,10 +21,14 @@ const getAllOrder = ({ page = 1, limit = 6, filters = {} }) => {
 const adminUpdateStatus = (formData, orderId) => {
   return instance.put(`/admin/order-status/${orderId}`, formData);
 };
+const createVnPayOrder = (formData) => {
+  return instance.post(`/payment`, formData);
+};
 export {
   createOrder,
   getOrderByUser,
   userUpdateStatus,
   getAllOrder,
   adminUpdateStatus,
+  createVnPayOrder,
 };

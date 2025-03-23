@@ -2,11 +2,12 @@
 const express = require("express");
 const { asynchandler } = require("../helpers/asynchandler");
 const { authentication } = require("../auth/authUtils");
-const accessController = require("../controller/access.controller");
-const { sortObject } = require("../utils");
 const router = express.Router();
-const crypto = require("crypto");
-router.post("/payment", asynchandler(accessController.payment));
-router.post("/vnpay_ipn", asynchandler(accessController.vnpay_ipn));
-router.get("/vnpay_return", asynchandler(accessController.vnpay_return));
+const paymentController = require("../controller/payment.controller");
+router.post(
+  "/payment",
+  authentication,
+  asynchandler(paymentController.payment)
+);
+
 module.exports = router;

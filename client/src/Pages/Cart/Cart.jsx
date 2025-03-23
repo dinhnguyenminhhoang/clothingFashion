@@ -1,23 +1,24 @@
-import React, { useState, useEffect } from "react";
-import { Button, Input, Modal, message } from "antd";
 import {
+  BankOutlined,
+  CheckCircleOutlined,
+  CreditCardOutlined,
+  DeleteOutlined,
   MinusOutlined,
   PlusOutlined,
-  DeleteOutlined,
   ShoppingCartOutlined,
-  CreditCardOutlined,
-  CheckOutlined,
-  CheckCircleOutlined,
 } from "@ant-design/icons";
-import { formatCurrencyVND } from "../../utils";
+import { Button, Input, Modal, message } from "antd";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createOrder, userUpdateStatus } from "../../service/orderService";
-import { Elements } from "@stripe/react-stripe-js";
-import { IMAGEURL, stripeKey } from "../../utils/constant";
-import { loadStripe } from "@stripe/stripe-js";
-import useNotification from "../../hooks/NotiHook";
 import QrCodeForm from "../../Components/FormManage/QrCodeForm";
-const stripePromise = loadStripe(stripeKey);
+import useNotification from "../../hooks/NotiHook";
+import {
+  createOrder,
+  createVnPayOrder,
+  userUpdateStatus,
+} from "../../service/orderService";
+import { formatCurrencyVND } from "../../utils";
+import { IMAGEURL } from "../../utils/constant";
 
 const Cart = () => {
   const [cart, setCart] = useState([]);
@@ -32,6 +33,7 @@ const Cart = () => {
   });
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("cash");
+  const [isProcessing, setIsProcessing] = useState(false);
   const navigator = useNavigate();
 
   useEffect(() => {
@@ -88,27 +90,53 @@ const Cart = () => {
     );
     return totalProductPrice;
   };
+
   const handleCreateOrder = async () => {
     try {
+      setIsProcessing(true);
       const filteredCart = cart.map((item) => ({
         product: item._id,
         productName: item.title,
         quantity: item.quantity,
         size: item.size,
       }));
-      const res = await createOrder({
-        ...deliveryInfo,
-        paymentMethod: paymentMethod,
-        totalAmount: calculateTotal(),
-        cart: filteredCart,
-      });
-      if (paymentMethod === "cash") {
+
+      if (paymentMethod === "vnpay") {
+        // Xử lý đặt hàng với VNPay
+        const orderData = {
+          ...deliveryInfo,
+          paymentMethod: "draftVnpay",
+          totalAmount: calculateTotal(),
+          cart: filteredCart,
+        };
+
+        const res = await createVnPayOrder(orderData);
+        if (res.status === 200) {
+          window.location.href = res.data;
+        } else {
+          message.error("Không thể tạo giao dịch VNPay. Vui lòng thử lại sau!");
+        }
+      } else if (paymentMethod === "cash") {
+        const res = await createOrder({
+          ...deliveryInfo,
+          paymentMethod: paymentMethod,
+          totalAmount: calculateTotal(),
+          cart: filteredCart,
+        });
+
         if (res.status === 201) {
           message.success("Đặt hàng thành công");
           localStorage.removeItem("cart");
           navigator("/history-order");
         }
       } else if (paymentMethod === "credit") {
+        const res = await createOrder({
+          ...deliveryInfo,
+          paymentMethod: paymentMethod,
+          totalAmount: calculateTotal(),
+          cart: filteredCart,
+        });
+
         setDraftOrder(res.data);
         setShowQRModal(true);
       }
@@ -119,9 +147,11 @@ const Cart = () => {
         error: error,
       });
     } finally {
+      setIsProcessing(false);
       setShowPaymentModal(false);
     }
   };
+
   const handleCancelPaymentOnline = async () => {
     try {
       const res = await userUpdateStatus({ status: "cancel" }, draftOrder?._id);
@@ -136,6 +166,7 @@ const Cart = () => {
       }
     } catch (error) {}
   };
+
   const handleConfirmPaymentQrCode = () => {
     openNotification({
       message: "Thông báo",
@@ -144,6 +175,7 @@ const Cart = () => {
     localStorage.removeItem("cart");
     navigator("/history-order");
   };
+
   return (
     <div className="container mx-auto p-4">
       <h2 className="text-2xl font-semibold mb-4">Giỏ Hàng</h2>
@@ -230,6 +262,7 @@ const Cart = () => {
                     onClick={() => setShowPaymentModal(true)}
                     className="px-6 py-4 font-bold"
                     disabled={!deliveryInfo.address}
+                    loading={isProcessing}
                   >
                     Đặt Hàng
                   </Button>
@@ -274,7 +307,11 @@ const Cart = () => {
           >
             Hủy
           </Button>,
-          <Button type="primary" onClick={handleCreateOrder}>
+          <Button
+            type="primary"
+            onClick={handleCreateOrder}
+            loading={isProcessing}
+          >
             Xác nhận thanh toán
           </Button>,
         ]}
@@ -310,6 +347,20 @@ const Cart = () => {
               <CheckCircleOutlined className="absolute top-1 right-2 text-green-700" />
             ) : null}
             Thanh Toán Qua Qr code
+          </Button>
+          <Button
+            className={`py-5 relative ${
+              paymentMethod === "vnpay"
+                ? "border-green-600 border text-green-600"
+                : ""
+            }`}
+            icon={<BankOutlined />}
+            onClick={() => setPaymentMethod("vnpay")}
+          >
+            {paymentMethod === "vnpay" ? (
+              <CheckCircleOutlined className="absolute top-1 right-2 text-green-700" />
+            ) : null}
+            Thanh Toán Qua VNPay
           </Button>
         </div>
       </Modal>

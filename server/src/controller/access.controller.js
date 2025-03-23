@@ -1,23 +1,43 @@
 "use strict";
 
-const { SuccessResponse } = require("../core/success.response");
+const { SuccessResponse, CREATED } = require("../core/success.response");
 const AccessService = require("../services/access.service");
 const PaymentService = require("../services/payment.service");
 
 class AccessController {
-  payment = async (req, res, next) => {
+  login = async (req, res, next) => {
     new SuccessResponse({
-      data: await PaymentService.payment(req),
+      data: await AccessService.login(req.body),
     }).send(res);
   };
-  vnpay_ipn = async (req, res, next) => {
-    new SuccessResponse({
-      data: await PaymentService.vnpay_ipn(req),
+  singUp = async (req, res, next) => {
+    new CREATED({
+      message: "Register OK!",
+      data: await AccessService.singUp(req.body),
     }).send(res);
   };
-  vnpay_return = async (req, res, next) => {
+  forgotPassword = async (req, res, next) => {
     new SuccessResponse({
-      data: await PaymentService.vnpay_return(req),
+      message: "OK!",
+      data: await AccessService.forgotPassword(req.body),
+    }).send(res);
+  };
+  confirmAccount = async (req, res, next) => {
+    new SuccessResponse({
+      message: "OK!",
+      data: await AccessService.confirmAccount(req.user, req.keyStore),
+    }).send(res);
+  };
+  resetPassword = async (req, res, next) => {
+    new SuccessResponse({
+      message: "OK!",
+      data: await AccessService.resetPassword(req.body, req.user, req.keyStore),
+    }).send(res);
+  };
+  logout = async (req, res, next) => {
+    new SuccessResponse({
+      message: "logout successfully",
+      data: await AccessService.Logout({ keyStore: req.keyStore }),
     }).send(res);
   };
 }

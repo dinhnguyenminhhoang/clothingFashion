@@ -68,6 +68,7 @@ class AccessService {
     const foundUser = await findByEmail({
       email,
     });
+    console.log("foundUser", foundUser);
     if (!foundUser) {
       throw new badRequestError("user not registered");
     }

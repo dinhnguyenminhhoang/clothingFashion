@@ -28,11 +28,13 @@ import ConfirmAccoount from "./Pages/Auth/ConfirmAccount/ConfirmAccoount";
 import ManagerContact from "./Pages/admin/ManagerContact/ManagerContact";
 import ManagerCategory from "./Pages/admin/ManagerCategory/ManagerCategory";
 import ManagerChatbot from "./Pages/admin/ManagerChatbot/ManagerChatbot";
+import VnpayReturn from "./Pages/VnpayReturn/VnpayReturn";
 const App = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path="/">
         <Route path="/login" element={<Login />} />
+        <Route path="/vnpay_return" element={<VnpayReturn />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />

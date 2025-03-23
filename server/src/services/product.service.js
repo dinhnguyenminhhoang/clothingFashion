@@ -26,7 +26,7 @@ class ProductService {
     const newBrandId = new mongoose.Types.ObjectId(data.brand);
     const newCategoryId = new mongoose.Types.ObjectId(data.category);
     const productObjectId = new mongoose.Types.ObjectId(productId);
-    if (!existingProduct.brand.equals(newBrandId)) {
+    if (!existingProduct.brand?.equals(newBrandId)) {
       const oldBrandId = new mongoose.Types.ObjectId(existingProduct.brand);
       await Brand.updateOne(
         { _id: oldBrandId },
@@ -39,7 +39,7 @@ class ProductService {
     }
 
     // Kiểm tra và cập nhật category nếu thay đổi
-    if (!existingProduct.category.equals(newCategoryId)) {
+    if (!existingProduct.category?.equals(newCategoryId)) {
       const oldCategoryId = new mongoose.Types.ObjectId(
         existingProduct.category
       );

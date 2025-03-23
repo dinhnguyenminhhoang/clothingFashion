@@ -145,11 +145,12 @@ class OrderService {
     const statusTransition = {
       pending: ["processing", "cancel"],
       processing: ["delivered"],
+      vnpay: ["pending", "processing", "delivered"],
       delivered: [],
       cancel: [],
     };
 
-    if (!statusTransition[currentStatus].includes(newStatus)) {
+    if (!statusTransition[currentStatus]?.includes(newStatus)) {
       throw new conflictRequestError(
         `Cannot transition from ${currentStatus} to ${newStatus}`
       );

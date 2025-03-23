@@ -80,6 +80,7 @@ const OrderHistory = () => {
           cancel: "Đã hủy",
           processing: "Đang xử lý",
           delivered: "Đã giao hàng",
+          vnpay: "Đã thanh toán qua vnpay",
         };
 
         return (

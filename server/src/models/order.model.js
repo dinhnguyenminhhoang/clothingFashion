@@ -44,7 +44,7 @@ const orderSchema = new Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ["cash", "credit"],
+      enum: ["cash", "credit", "draftVnpay", "vnpay"],
       default: "cash",
     },
     isRating: {
