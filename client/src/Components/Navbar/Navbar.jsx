@@ -75,7 +75,7 @@ const Navbar = () => {
   return (
     <div className="bg-white h-[70px] border-b border-b-black flex items-center justify-center">
       <div className="container flex items-center justify-between gap-12">
-        <span className="font-bold text-xl">Nhóm15 TTTN</span>
+        <span className="font-bold text-xl">QUANAOVN</span>
         <div className="flex ml-20 gap-4 items-center">
           <div
             className="flex items-center gap-2 cursor-pointer"

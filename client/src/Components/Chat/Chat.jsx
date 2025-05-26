@@ -1,17 +1,21 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Button, Input, message, Spin } from "antd";
-import { CloseOutlined } from "@ant-design/icons";
-import { chatWithApi } from "../../service/chatbotService";
-
-const { TextArea } = Input;
+import {
+  LoadingOutlined,
+  MessageOutlined,
+  SendOutlined,
+  XFilled,
+} from "@ant-design/icons";
+import axios from "axios";
+import { useEffect, useRef, useState } from "react";
 
 const Chat = () => {
   const [isChatVisible, setIsChatVisible] = useState(false);
   const [messageText, setMessageText] = useState("");
+  const [secctionId, setSecctioonId] = useState(null);
   const [messages, setMessages] = useState([
     { id: 1, text: "Xin chào! Tôi có thể giúp gì cho bạn?", sender: "bot" },
   ]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -20,31 +24,88 @@ const Chat = () => {
 
   const toggleChat = () => {
     setIsChatVisible(!isChatVisible);
+    setError("");
+  };
+  useEffect(() => {
+    if (!secctionId) {
+      const storedSectionId = localStorage.getItem("sectionId");
+      if (storedSectionId) {
+        setSecctioonId(storedSectionId);
+      } else {
+        const newSectionId = Date.now();
+        setSecctioonId(newSectionId);
+        localStorage.setItem("sectionId", newSectionId);
+      }
+    }
+  }, []);
+  const chatWithN8N = async (message) => {
+    try {
+      const response = await axios.post(
+        "https://primary-production-94167.up.railway.app/webhook/ed8608eb-6329-4c49-86b3-da5d1ab4b488",
+        { message: message, secctionId: secctionId }
+      );
+      const data = await response.data;
+      return data;
+    } catch (error) {
+      console.error("Error calling n8n webhook:", error);
+      throw error;
+    }
   };
 
   const handleSendMessage = async () => {
     if (messageText.trim() === "") {
-      message.warning("Vui lòng nhập tin nhắn!");
+      setError("Vui lòng nhập tin nhắn!");
       return;
     }
 
     setLoading(true);
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      { id: prevMessages.length + 1, text: messageText, sender: "user" },
-    ]);
+    setError("");
+
+    const userMessage = {
+      id: Date.now(),
+      text: messageText,
+      sender: "user",
+    };
+
+    setMessages((prevMessages) => [...prevMessages, userMessage]);
+    const currentMessage = messageText;
     setMessageText("");
 
     try {
-      const res = await chatWithApi({ message: messageText });
-      if (res.data) {
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          { id: prevMessages.length + 1, text: res.data, sender: "bot" },
-        ]);
+      const response = await chatWithN8N(currentMessage);
+
+      // Extract response text - adjust this based on your n8n webhook response structure
+      let botResponseText = "";
+      if (typeof response === "string") {
+        botResponseText = response;
+      } else if (response.message) {
+        botResponseText = response.message;
+      } else if (response.text) {
+        botResponseText = response.text;
+      } else if (response.response) {
+        botResponseText = response.response;
+      } else {
+        botResponseText = "Đã nhận được phản hồi từ bot";
       }
+
+      const botMessage = {
+        id: Date.now() + 1,
+        text: botResponseText,
+        sender: "bot",
+      };
+
+      setMessages((prevMessages) => [...prevMessages, botMessage]);
     } catch (error) {
-      message.error("Đã xảy ra lỗi khi gửi tin nhắn!");
+      setError("Đã xảy ra lỗi khi gửi tin nhắn. Vui lòng thử lại!");
+      console.error("Chat error:", error);
+
+      // Add error message to chat
+      const errorMessage = {
+        id: Date.now() + 1,
+        text: "Xin lỗi, tôi không thể phản hồi lúc này. Vui lòng thử lại sau.",
+        sender: "bot",
+      };
+      setMessages((prevMessages) => [...prevMessages, errorMessage]);
     } finally {
       setLoading(false);
     }
@@ -60,15 +121,20 @@ const Chat = () => {
   return (
     <div className="fixed bottom-4 right-4 z-50">
       {isChatVisible && (
-        <div className="bg-white shadow-2xl rounded-lg w-96 h-[600px] flex flex-col relative">
-          <div className="p-4 border-b border-gray-200 flex justify-between">
+        <div className="bg-white shadow-2xl rounded-lg w-96 h-[600px] flex flex-col relative border border-gray-200">
+          {/* Header */}
+          <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-blue-500 text-white rounded-t-lg">
             <h3 className="text-lg font-semibold">Chat với Bot</h3>
-            <CloseOutlined
-              className="text-xl cursor-pointer hover:bg-gray-200 p-1 rounded-full"
+            <button
               onClick={() => setIsChatVisible(false)}
-            />
+              className="hover:bg-blue-600 p-1 rounded-full transition-colors"
+            >
+              <XFilled size={20} />
+            </button>
           </div>
-          <div className="flex-1 p-4 overflow-y-auto">
+
+          {/* Messages */}
+          <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
             {messages.map((msg) => (
               <div
                 key={msg.id}
@@ -77,53 +143,75 @@ const Chat = () => {
                 } mb-4`}
               >
                 <div
-                  className={`max-w-[70%] p-3 rounded-lg ${
+                  className={`max-w-[70%] p-3 rounded-lg break-words ${
                     msg.sender === "bot"
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-200 text-gray-800"
+                      ? "bg-white text-gray-800 shadow-sm border"
+                      : "bg-blue-500 text-white"
                   }`}
-                >
-                  {msg.text}
-                </div>
+                  dangerouslySetInnerHTML={{ __html: msg.text }}
+                ></div>
               </div>
             ))}
+
             {loading && (
               <div className="flex justify-start mb-4">
-                <Spin size="small" />
+                <div className="bg-white p-3 rounded-lg shadow-sm border flex items-center gap-2">
+                  <LoadingOutlined
+                    size={16}
+                    className="animate-spin text-blue-500"
+                  />
+                  <span className="text-gray-600">Đang nhập...</span>
+                </div>
               </div>
             )}
-            {/* Phần tử ẩn để scroll xuống */}
+
             <div ref={messagesEndRef} />
           </div>
-          <div className="p-4 border-t border-gray-200">
-            <TextArea
-              rows={2}
-              value={messageText}
-              onChange={(e) => setMessageText(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Nhập tin nhắn..."
-            />
-            <Button
-              type="primary"
-              className="mt-2 w-full"
-              onClick={handleSendMessage}
-              disabled={loading}
-            >
-              {loading ? <Spin size="small" /> : "Gửi"}
-            </Button>
+
+          {/* Error message */}
+          {error && (
+            <div className="px-4 py-2 bg-red-50 border-t border-red-200">
+              <p className="text-red-600 text-sm">{error}</p>
+            </div>
+          )}
+
+          {/* Input */}
+          <div className="p-4 border-t border-gray-200 bg-white rounded-b-lg">
+            <div className="flex gap-2">
+              <textarea
+                rows={2}
+                value={messageText}
+                onChange={(e) => setMessageText(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Nhập tin nhắn..."
+                className="flex-1 p-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={loading}
+              />
+              <button
+                onClick={handleSendMessage}
+                disabled={loading || messageText.trim() === ""}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[50px]"
+              >
+                {loading ? (
+                  <LoadingOutlined size={16} className="animate-spin" />
+                ) : (
+                  <SendOutlined size={16} />
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}
-      <Button
-        type="primary"
-        shape="circle"
-        size="large"
-        className="shadow-lg"
-        onClick={toggleChat}
-        style={{ display: isChatVisible ? "none" : "block" }}
-      >
-        💬
-      </Button>
+
+      {/* Chat Toggle Button */}
+      {!isChatVisible && (
+        <button
+          onClick={toggleChat}
+          className="bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+        >
+          <MessageOutlined size={24} />
+        </button>
+      )}
     </div>
   );
 };

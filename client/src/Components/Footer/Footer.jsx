@@ -45,7 +45,7 @@ const Footer = () => {
             <div className="mb-8">
               <div className="mb-6">
                 <Link href="/">
-                  <span className="font-bold text-xl">Nhóm15 TTTN</span>
+                  <span className="font-bold text-xl">QUANAOVN</span>
                 </Link>
               </div>
               <p className="text-gray-600">
@@ -157,10 +157,10 @@ const Footer = () => {
                   </span>
                   <p>
                     <a
-                      href="mailto:Nhom15tttn@gmail.com"
+                      href="mailto:admin@gmail.com"
                       className="hover:text-blue-500"
                     >
-                      Nhom15tttn@gmail.com
+                      admin@gmail.com
                     </a>
                   </p>
                 </div>
