@@ -15,5 +15,11 @@ class ReviewController {
       data: await ReviewService.deleteReview(id),
     }).send(res);
   };
+
+  getHighRatedReviews = async (req, res, next) => {
+    new SuccessResponse({
+      data: await ReviewService.getHighRatedReviews(req.query),
+    }).send(res);
+  };
 }
 module.exports = new ReviewController();

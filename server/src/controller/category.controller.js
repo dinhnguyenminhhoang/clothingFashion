@@ -5,8 +5,15 @@ const CategoryService = require("../services/category.service");
 
 class CategorynController {
   createNewCategory = async (req, res, next) => {
+    const categoryData = { ...req.body };
+
+    // Add image path if file was uploaded
+    if (req.file) {
+      categoryData.image = `uploads/${req.file.filename}`;
+    }
+
     new CREATED({
-      data: await CategoryService.createNewCategory(req.body),
+      data: await CategoryService.createNewCategory(categoryData),
     }).send(res);
   };
   deleteCategory = async (req, res, next) => {
@@ -22,8 +29,15 @@ class CategorynController {
   };
   updateCategory = async (req, res, next) => {
     const { id } = req.params;
+    const updateData = { ...req.body };
+
+    // Add image path if file was uploaded
+    if (req.file) {
+      updateData.image = `uploads/${req.file.filename}`;
+    }
+
     new SuccessResponse({
-      data: await CategoryService.updateCategory(id, req.body),
+      data: await CategoryService.updateCategory(id, updateData),
     }).send(res);
   };
 }

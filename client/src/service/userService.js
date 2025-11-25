@@ -3,9 +3,11 @@ import instance from "../config/instance";
 const getUserProfile = () => {
   return instance.get(`/profile`);
 };
+
 const updateUserProfile = (formData) => {
   return instance.post("/profile", formData);
 };
+
 const getAllUser = ({ page = 1, limit = 6, filters = {} }) => {
   const queryParams = new URLSearchParams({
     page,
@@ -14,15 +16,35 @@ const getAllUser = ({ page = 1, limit = 6, filters = {} }) => {
   }).toString();
   return instance.get(`/user?${queryParams}`);
 };
+
 const deleteUser = (userId) => {
   return instance.delete(`/user/${userId}`);
 };
+
 const createNewUser = (formData) => {
   return instance.post(`/user`, formData);
 };
+
 const adminUpdateUser = (userId, formData) => {
   return instance.put(`/user/${userId}`, formData);
 };
+
+const addAddress = (data) => {
+  return instance.post("/address", data);
+};
+
+const getAddresses = () => {
+  return instance.get("/address");
+};
+
+const updateAddress = (addressId, data) => {
+  return instance.put(`/address/${addressId}`, data);
+};
+
+const deleteAddress = (addressId) => {
+  return instance.delete(`/address/${addressId}`);
+};
+
 export {
   getUserProfile,
   updateUserProfile,
@@ -30,4 +52,8 @@ export {
   deleteUser,
   createNewUser,
   adminUpdateUser,
+  addAddress,
+  getAddresses,
+  updateAddress,
+  deleteAddress,
 };

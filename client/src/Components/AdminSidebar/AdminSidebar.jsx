@@ -9,6 +9,8 @@ import {
   TagOutlined,
   LogoutOutlined,
   ContactsFilled,
+  GiftOutlined,
+  PercentageOutlined,
 } from "@ant-design/icons";
 import Cookies from "js-cookie";
 import { MdCategory, MdChatBubbleOutline, MdCollections } from "react-icons/md";
@@ -80,6 +82,20 @@ const AdminSidebar = () => {
           className="hover:bg-gray-100 py-6 text-lg"
         >
           <Link to="/manager-chatbot">Quản lý chatbot</Link>
+        </Menu.Item>
+        <Menu.Item
+          key="10"
+          icon={<GiftOutlined />}
+          className="hover:bg-gray-100 py-6 text-lg"
+        >
+          <Link to="/manager-voucher">Quản lý Voucher</Link>
+        </Menu.Item>
+        <Menu.Item
+          key="11"
+          icon={<PercentageOutlined />}
+          className="hover:bg-gray-100 py-6 text-lg"
+        >
+          <Link to="/manager-discount">Quản lý Discount</Link>
         </Menu.Item>
         <Menu.Item
           key="7"

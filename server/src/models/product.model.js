@@ -89,6 +89,7 @@ const productSchema = new Schema(
       enum: ["active", "inActive"],
       default: "active",
     },
+
   },
   { timestamps: true, collection: COLLECTION_NAME }
 );
@@ -134,7 +135,9 @@ productSchema.pre("save", function (next) {
     this.status = "in-stock";
   }
 
+  // No discount calculation here; handled by Discount model/service
   next();
+
 });
 // Middleware pre-findOneAndUpdate để cập nhật quantity khi cập nhật sản phẩm
 productSchema.pre("findOneAndUpdate", async function (next) {

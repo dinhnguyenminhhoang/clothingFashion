@@ -1,5 +1,10 @@
 import instance from "../config/instance";
 
+// Get all homepage data in one API call (matches mobile app)
+const getHomepageData = () => {
+  return instance.get(`/product/homepage/all-data`);
+};
+
 const getProductByType = (type, limit) => {
   return instance.get(`/product-type/${type}`, { params: { limit } });
 };
@@ -60,6 +65,7 @@ const updateProductQuantity = (productId, formData) => {
   return instance.put(`/product-quantity/${productId}`, formData);
 };
 export {
+  getHomepageData,
   getProductByType,
   getProductDetail,
   getAllProduct,

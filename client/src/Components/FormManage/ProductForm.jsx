@@ -28,6 +28,7 @@ const ProductForm = ({ initialValues, onSave, onCancel }) => {
         brand: initialValues.brand._id,
         category: initialValues.category?._id || null,
         sizes: formattedSizes,
+        discount: initialValues.discount || 0,
       });
       setImageUrl(initialValues.img);
     }
@@ -81,6 +82,39 @@ const ProductForm = ({ initialValues, onSave, onCancel }) => {
         ]}
       >
         <Input placeholder="Nhập giá bán" />
+      </Form.Item>
+      <Form.Item
+        name="discount"
+        label="Giảm giá (%)"
+        rules={[
+          {
+            type: "number",
+            min: 0,
+            max: 100,
+            message: "Discount must be between 0 and 100",
+          },
+        ]}
+      >
+        <Input type="number" placeholder="Nhập % giảm giá (0-100)" suffix="%" />
+      </Form.Item>
+      <Form.Item
+        shouldUpdate={(prevValues, currentValues) => 
+          prevValues.price !== currentValues.price || 
+          prevValues.discount !== currentValues.discount
+        }
+        noStyle
+      >
+        {({ getFieldValue }) => {
+          const price = getFieldValue('price') || 0;
+          const discount = getFieldValue('discount') || 0;
+          const salePrice = Math.round(price * (1 - discount / 100));
+          return discount > 0 ? (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md text-green-700">
+              <span className="font-semibold">Giá sau giảm: </span>
+              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(salePrice)}
+            </div>
+          ) : null;
+        }}
       </Form.Item>
       <Form.Item
         name="description"

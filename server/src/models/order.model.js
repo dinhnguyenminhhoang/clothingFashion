@@ -42,6 +42,15 @@ const orderSchema = new Schema(
       type: Number,
       required: true,
     },
+    voucher: {
+      code: String,
+      discount: Number,
+      voucherId: { type: Schema.Types.ObjectId, ref: "Voucher" },
+    },
+    finalAmount: {
+      type: Number,
+      required: true,
+    },
     paymentMethod: {
       type: String,
       enum: ["cash", "credit", "draftVnpay", "vnpay"],
@@ -56,6 +65,27 @@ const orderSchema = new Schema(
       type: String,
       enum: ["pending", "processing", "delivered", "cancel"],
       default: "pending",
+    },
+    statusHistory: [
+      {
+        status: {
+          type: String,
+          enum: ["pending", "processing", "delivered", "cancel"],
+          required: true,
+        },
+        timestamp: {
+          type: Date,
+          default: Date.now,
+        },
+        note: String,
+        updatedBy: {
+          type: Schema.Types.ObjectId,
+          ref: "User",
+        },
+      },
+    ],
+    estimatedDelivery: {
+      type: Date,
     },
   },
   { timestamps: true, collection: COLLECTION_NAME }

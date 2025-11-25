@@ -1,14 +1,13 @@
-import React from "react";
-import logo from "../../assets/logo.svg";
-import pay from "../../assets/img/footer/footer-pay.png";
-import { Email, Location } from "../../svg/index";
-import { Link } from "react-router-dom";
 import {
   FacebookOutlined,
   LinkedinOutlined,
   TwitterOutlined,
   VideoCameraOutlined,
 } from "@ant-design/icons";
+import { Link } from "react-router-dom";
+import pay from "../../assets/img/footer/footer-pay.png";
+import logo from "../../assets/logo.png";
+import { Email, Location } from "../../svg/index";
 
 const social_data = [
   {
@@ -38,145 +37,83 @@ const social_data = [
 ];
 const Footer = () => {
   return (
-    <footer className="mt-10">
-      <div className="bg-gray-200 pt-16 pb-10">
-        <div className="container mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="mb-8">
-              <div className="mb-6">
-                <Link href="/">
-                  <span className="font-bold text-xl">QUANAOVN</span>
-                </Link>
-              </div>
-              <p className="text-gray-600">
-                We are a dynamic team of full stack developers and designers
-                crafting high-quality web applications.
-              </p>
-              <div className="flex space-x-4 mt-4">
-                {social_data.map((s) => (
-                  <a
-                    href={s.link}
-                    key={s.id}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-gray-500 hover:text-blue-500"
-                  >
-                    {s.icon}
-                  </a>
-                ))}
-              </div>
+    <footer className="mt-20 bg-gray-900 text-white pt-16 pb-8">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+          {/* Brand Info */}
+          <div>
+            <Link to="/" className="inline-block mb-6">
+              <img src={logo} alt="NOVA FASHION" className="h-12 w-auto brightness-0 invert" />
+            </Link>
+            <p className="text-gray-400 leading-relaxed mb-6">
+              Chúng tôi là đội ngũ chuyên nghiệp cam kết mang đến những sản phẩm thời trang chất lượng cao,
+              phong cách hiện đại và trải nghiệm mua sắm tuyệt vời nhất.
+            </p>
+            <div className="flex space-x-4">
+              {social_data.map((s) => (
+                <a
+                  href={s.link}
+                  key={s.id}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-white hover:text-black transition-all duration-300"
+                >
+                  {s.icon}
+                </a>
+              ))}
             </div>
+          </div>
 
-            <div className="mb-8">
-              <h4 className="text-lg font-semibold mb-4">Tài khoản của tôi</h4>
-              <ul className="text-gray-600 space-y-2">
-                <li>
-                  <a href="#" className="hover:text-blue-500">
-                    Theo dõi đơn hàng
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-blue-500">
-                    Giao hàng
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-blue-500">
-                    Danh sách yêu thích
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-blue-500">
-                    Tài khoản của tôi
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-blue-500">
-                    Lịch sử đơn hàng
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-blue-500">
-                    Trả hàng
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div className="mb-8">
-              <h4 className="text-lg font-semibold mb-4">Thông tin</h4>
-              <ul className="text-gray-600 space-y-2">
-                <li>
-                  <a href="#" className="hover:text-blue-500">
-                    Câu chuyện của chúng tôi
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-blue-500">
-                    Nghề nghiệp
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-blue-500">
-                    Chính sách bảo mật
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-blue-500">
-                    Điều khoản & Điều kiện
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-blue-500">
-                    Tin tức mới nhất
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-blue-500">
-                    Liên hệ với chúng tôi
-                  </a>
-                </li>
-              </ul>
-            </div>
+          {/* Links */}
+          <div>
+            <h4 className="text-lg font-bold mb-6 text-white">Khám Phá</h4>
+            <ul className="space-y-4 text-gray-400">
+              <li><Link to="/shop" className="hover:text-white transition-colors">Sản phẩm mới</Link></li>
+              <li><Link to="/shop" className="hover:text-white transition-colors">Bộ sưu tập</Link></li>
+              <li><Link to="/shop" className="hover:text-white transition-colors">Bán chạy nhất</Link></li>
+              <li><Link to="/shop" className="hover:text-white transition-colors">Khuyến mãi</Link></li>
+            </ul>
+          </div>
 
-            <div className="mb-8">
-              <h4 className="text-lg font-semibold mb-4">Talk To Us</h4>
-              <div className="mb-6">
-                <span className="block text-gray-600">
-                  Got Questions? Call us
-                </span>
-                <h4 className="text-xl font-bold">
-                  <a href="tel:670-413-90-762" className="hover:text-blue-500">
-                    +84337373733
-                  </a>
-                </h4>
+          {/* Customer Service */}
+          <div>
+            <h4 className="text-lg font-bold mb-6 text-white">Hỗ Trợ Khách Hàng</h4>
+            <ul className="space-y-4 text-gray-400">
+              <li><Link to="/profile" className="hover:text-white transition-colors">Tài khoản của tôi</Link></li>
+              <li><Link to="/history-order" className="hover:text-white transition-colors">Lịch sử đơn hàng</Link></li>
+              <li><Link to="/contact" className="hover:text-white transition-colors">Liên hệ</Link></li>
+              <li><Link to="#" className="hover:text-white transition-colors">Chính sách đổi trả</Link></li>
+              <li><Link to="#" className="hover:text-white transition-colors">Câu hỏi thường gặp</Link></li>
+            </ul>
+          </div>
+
+          {/* Contact Info */}
+          <div>
+            <h4 className="text-lg font-bold mb-6 text-white">Liên Hệ</h4>
+            <div className="space-y-4 text-gray-400">
+              <p>Bạn có câu hỏi? Gọi ngay:</p>
+              <a href="tel:+84337373733" className="text-2xl font-bold text-white hover:text-blue-400 transition-colors block">
+                +84 337 373 733
+              </a>
+              <div className="flex items-center gap-3 mt-4">
+                <Email className="w-5 h-5" />
+                <a href="mailto:support@novafashion.vn" className="hover:text-white transition-colors">
+                  support@novafashion.vn
+                </a>
               </div>
-              <div className="space-y-4">
-                <div className="flex items-start">
-                  <span className="mr-4 text-gray-500">
-                    <Email />
-                  </span>
-                  <p>
-                    <a
-                      href="mailto:admin@gmail.com"
-                      className="hover:text-blue-500"
-                    >
-                      admin@gmail.com
-                    </a>
-                  </p>
-                </div>
+              <div className="flex items-start gap-3">
+                <Location className="w-5 h-5 mt-1" />
+                <span>123 Đường ABC, Quận XYZ, TP. Hồ Chí Minh</span>
               </div>
             </div>
           </div>
         </div>
-        <div className="border-t mt-8 pt-6">
-          <div className="container mx-auto flex flex-col md:flex-row justify-between items-center text-gray-600">
-            <p className="text-sm">
-              © {new Date().getFullYear()} Tất cả quyền được bảo lưu | React.js
-            </p>
-            <div className="mt-4 md:mt-0">
-              <img src={pay} alt="thanh toán" />
-            </div>
-          </div>
+
+        <div className="border-t border-gray-800 mt-16 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-gray-500 text-sm">
+            © {new Date().getFullYear()} NOVA FASHION. All rights reserved.
+          </p>
+          <img src={pay} alt="Payment Methods" className="h-8 opacity-70" />
         </div>
       </div>
     </footer>

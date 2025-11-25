@@ -16,10 +16,47 @@ const {
   cancelOrderForm,
 } = require("../utils/emailExtension");
 const { paginate } = require("../utils/paginate");
+const VoucherService = require("./voucher.service");
 
 class OrderService {
   static createNewOrder = async (payload, user) => {
     if (!user) throw new ForbiddenError("User not found");
+
+    let voucherDiscount = 0;
+    let voucherData = null;
+
+    // Apply voucher if provided
+    if (payload.voucherCode) {
+      try {
+        const validation = await VoucherService.validateVoucher(
+          payload.voucherCode,
+          {
+            totalAmount: payload.totalAmount,
+            products: payload.cart.map(item => ({
+              _id: item.product
+            }))
+          }
+        );
+
+        voucherDiscount = validation.discount;
+        voucherData = {
+          code: validation.voucher.code,
+          discount: voucherDiscount,
+          voucherId: validation.voucher._id,
+        };
+      } catch (error) {
+        throw new badRequestError(error.message || "Invalid voucher");
+      }
+    }
+
+    // Calculate estimated delivery (3 business days)
+    const calculateEstimatedDelivery = () => {
+      const now = new Date();
+      const deliveryDays = 3;
+      const estimated = new Date(now);
+      estimated.setDate(estimated.getDate() + deliveryDays);
+      return estimated;
+    };
 
     // Tạo đơn hàng
     const order = await Order.create({
@@ -30,6 +67,16 @@ class OrderService {
       paymentMethod: payload.paymentMethod || "cash",
       cart: payload.cart,
       totalAmount: payload.totalAmount,
+      voucher: voucherData,
+      finalAmount: payload.totalAmount - voucherDiscount,
+      statusHistory: [
+        {
+          status: "pending",
+          timestamp: new Date(),
+          note: "Đơn hàng đã được đặt thành công",
+        },
+      ],
+      estimatedDelivery: calculateEstimatedDelivery(),
     });
 
     if (!order) throw new Error("Order creation failed");
@@ -69,6 +116,17 @@ class OrderService {
         throw new Error(`Product not found: ${productId}`);
       }
     }
+
+    // Increment voucher usage if applied
+    if (voucherData) {
+      await VoucherService.applyVoucher(
+        payload.voucherCode,
+        user.userId,
+        order._id,
+        order.finalAmount
+      );
+    }
+
     const confirmOrder = confirmOrderForm(payload);
     await sendEmail(user.email, confirmOrder.title, confirmOrder.body);
     return order;
@@ -179,11 +237,26 @@ class OrderService {
         }
       }
     }
-    const updateOrder = await Order.findByIdAndUpdate(
-      orderId,
-      { status: newStatus },
-      { new: true }
-    ).lean();
+
+    // Helper function for default notes
+    const getDefaultNote = (status) => {
+      const notes = {
+        processing: "Đơn hàng đang được xử lý",
+        delivered: "Đơn hàng đã giao thành công",
+        cancel: "Đơn hàng đã bị hủy",
+      };
+      return notes[status] || "";
+    };
+
+    // Update order with status history
+    existingOrder.status = newStatus;
+    existingOrder.statusHistory.push({
+      status: newStatus,
+      timestamp: new Date(),
+      note: payload.note || getDefaultNote(newStatus),
+    });
+
+    const updateOrder = await existingOrder.save();
     if (!updateOrder) throw new NotFoundError("Order Not Found");
     let emailContent;
     switch (newStatus) {

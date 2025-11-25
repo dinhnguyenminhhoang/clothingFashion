@@ -2,6 +2,7 @@ import { Col, Divider, Modal, Row, Tag } from "antd";
 import React from "react";
 import { formatCurrencyVND } from "../../utils";
 import { IMAGEURL } from "../../utils/constant";
+import OrderTimeline from "../OrderTimeline/OrderTimeline";
 
 const OrderDetail = ({ selectedOrder, isModalVisible, handleCancel }) => {
   const calculateTotal = () => {
@@ -22,6 +23,9 @@ const OrderDetail = ({ selectedOrder, isModalVisible, handleCancel }) => {
     >
       {selectedOrder && (
         <div className="space-y-6">
+          {/* Order Timeline */}
+          <OrderTimeline order={selectedOrder} />
+          
           <div className="border-b pb-4">
             <h2 className="text-xl font-semibold text-gray-700">
               Thông tin người dùng
@@ -62,8 +66,21 @@ const OrderDetail = ({ selectedOrder, isModalVisible, handleCancel }) => {
               </Col>
               <Col span={12}>
                 <p>
-                  <strong>Tổng tiền:</strong>{" "}
+                  <strong>Tạm tính:</strong>{" "}
                   {formatCurrencyVND(selectedOrder.totalAmount)}
+                </p>
+                {selectedOrder.voucher?.code && (
+                  <p className="text-green-600">
+                    <strong>Mã giảm giá:</strong>{" "}
+                    <Tag color="red">{selectedOrder.voucher.code}</Tag>
+                    <span className="ml-2">
+                      -{formatCurrencyVND(selectedOrder.voucher.discount)}
+                    </span>
+                  </p>
+                )}
+                <p className="text-lg font-bold text-blue-600">
+                  <strong>Tổng tiền:</strong>{" "}
+                  {formatCurrencyVND(selectedOrder.finalAmount || selectedOrder.totalAmount)}
                 </p>
                 <p>
                   <strong>Phương thức thanh toán:</strong>{" "}
@@ -117,11 +134,30 @@ const OrderDetail = ({ selectedOrder, isModalVisible, handleCancel }) => {
               </div>
             ))}
             <Divider />
-            <div className="flex items-center gap-4">
-              <span className="font-bold text-lg">Tổng số tiền</span>
-              <span className="text-red-500 font-bold text-xl">
-                {formatCurrencyVND(calculateTotal())}
-              </span>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="font-semibold">Tạm tính:</span>
+                <span className="text-lg">
+                  {formatCurrencyVND(calculateTotal())}
+                </span>
+              </div>
+              {selectedOrder.voucher?.code && (
+                <div className="flex justify-between items-center text-green-600">
+                  <span className="font-semibold">
+                    Giảm giá ({selectedOrder.voucher.code}):
+                  </span>
+                  <span className="text-lg">
+                    -{formatCurrencyVND(selectedOrder.voucher.discount)}
+                  </span>
+                </div>
+              )}
+              <Divider className="my-2" />
+              <div className="flex justify-between items-center">
+                <span className="font-bold text-xl">Tổng cộng:</span>
+                <span className="text-red-500 font-bold text-2xl">
+                  {formatCurrencyVND(selectedOrder.finalAmount || selectedOrder.totalAmount)}
+                </span>
+              </div>
             </div>
           </div>
         </div>

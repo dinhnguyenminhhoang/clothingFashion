@@ -6,6 +6,7 @@ const { Product } = require("../models/product.model");
 const { paginate } = require("../utils/paginate");
 const { NotFoundError } = require("../core/error.response");
 const { Category } = require("../models/category.model");
+const DiscountService = require("./discount.service");
 
 class ProductService {
   static createNewProduct = async (data) => {
@@ -20,6 +21,7 @@ class ProductService {
     );
     return product;
   };
+
   static updateProduct = async (productId, data) => {
     const existingProduct = await Product.findById(productId);
     if (!existingProduct) throw new Error("Product not found.");
@@ -38,7 +40,6 @@ class ProductService {
       );
     }
 
-    // Kiểm tra và cập nhật category nếu thay đổi
     if (!existingProduct.category?.equals(newCategoryId)) {
       const oldCategoryId = new mongoose.Types.ObjectId(
         existingProduct.category
@@ -52,11 +53,26 @@ class ProductService {
         { $push: { products: productObjectId } }
       );
     }
+
+    // Calculate sale price
+    const price = data.price !== undefined ? Number(data.price) : existingProduct.price;
+    const discount = data.discount !== undefined ? Number(data.discount) : existingProduct.discount;
+
+    if (discount > 0) {
+      data.salePrice = Math.round(price * (1 - discount / 100));
+      data.isSale = true;
+    } else {
+      data.salePrice = price;
+      data.isSale = false;
+      data.discount = 0;
+    }
+
     return await Product.findOneAndUpdate(
       { _id: productId },
       { ...data }
     ).lean();
   };
+
   static deleteProduct = async (productId) => {
     const existingProduct = await Product.findById(productId);
     if (!existingProduct) throw new Error("Product not found.");
@@ -65,6 +81,7 @@ class ProductService {
       { productStatus: "inActive" }
     ).lean();
   };
+
   static getAllProducts = async (query) => {
     const {
       page = 1,
@@ -76,7 +93,7 @@ class ProductService {
       searchText,
       category,
     } = query;
-    console.log("query", query);
+
     if (priceRange) {
       const [minPrice, maxPrice] = priceRange.split(",").map(Number);
       filters.price = { $gte: minPrice, $lte: maxPrice };
@@ -108,30 +125,74 @@ class ProductService {
       searchText,
       searchFields: ["title", "description"],
     });
-    const productData = products.data.map((product) => {
-      const avgReview =
-        product.reviews.length > 0
-          ? product.reviews.reduce((acc, review) => acc + review.rating, 0) /
-            product.reviews.length
-          : 0;
 
-      return {
-        ...product,
-        avgReview,
-      };
-    });
+    // Calculate discounts and avg reviews for each product
+    const productData = await Promise.all(
+      products.data.map(async (product) => {
+        const avgReview =
+          product.reviews.length > 0
+            ? product.reviews.reduce((acc, review) => acc + review.rating, 0) /
+            product.reviews.length
+            : 0;
+
+        // Get applicable discount
+        const discount = await DiscountService.calculateDiscountForProduct(product._id);
+        const salePrice = discount
+          ? DiscountService.calculateSalePrice(product.price, discount)
+          : product.price;
+
+        return {
+          ...product,
+          avgReview,
+          discount: discount ? {
+            _id: discount._id,
+            name: discount.name,
+            percentage: discount.percentage,
+            endDate: discount.endDate
+          } : null,
+          salePrice
+        };
+      })
+    );
+
     products = {
       meta: products.meta,
       data: productData,
     };
     return products;
   };
+
+  // Helper to add discount information to a product
+  static addDiscountToProduct = async (product) => {
+    const discount = await DiscountService.calculateDiscountForProduct(product._id);
+    const salePrice = discount
+      ? DiscountService.calculateSalePrice(product.price, discount)
+      : product.price;
+
+    return {
+      ...product,
+      discount: discount ? {
+        _id: discount._id,
+        name: discount.name,
+        percentage: discount.percentage,
+        endDate: discount.endDate
+      } : null,
+      salePrice
+    };
+  };
+
   static getProductDetail = async (productId) => {
-    const product = await Product.findOne({ _id: productId }).populate([
-      "reviews",
-      "brand",
-      "category",
-    ]);
+    const product = await Product.findOne({ _id: productId })
+      .populate({
+        path: "reviews",
+        populate: {
+          path: "user",
+          select: "userName avatar",
+        },
+      })
+      .populate("brand")
+      .populate("category")
+      .lean();
 
     if (!product) {
       throw new Error("Product not found");
@@ -140,52 +201,79 @@ class ProductService {
     const avgReview =
       product.reviews.length > 0
         ? product.reviews.reduce((acc, review) => acc + review.rating, 0) /
-          product.reviews.length
+        product.reviews.length
         : 0;
 
+    // Apply discount
+    const discount = await DiscountService.calculateDiscountForProduct(productId);
+    const salePrice = discount
+      ? DiscountService.calculateSalePrice(product.price, discount)
+      : product.price;
+
     return {
-      ...product.toObject(),
+      ...product,
       avgReview,
+      discount: discount ? {
+        _id: discount._id,
+        name: discount.name,
+        percentage: discount.percentage,
+        description: discount.description,
+        terms: discount.terms,
+        endDate: discount.endDate
+      } : null,
+      salePrice
     };
   };
+
   static getProductType = async (type, query) => {
     const { limit } = query;
-    console.log("type", type);
-    // Tìm category có name chứa type
     const categories = await Category.find({
       name: { $regex: type, $options: "i" },
     });
 
     if (!categories.length) {
-      return []; // Không tìm thấy danh mục nào phù hợp
+      return [];
     }
 
-    // Lấy danh sách categoryId
     const categoryIds = categories.map((category) => category._id);
 
-    // Tìm sản phẩm theo categoryId
     let products = await Product.find({
       category: { $in: categoryIds },
       productStatus: "active",
     })
       .populate("reviews")
-      .limit(limit || 8);
+      .limit(limit || 8)
+      .lean();
 
-    // Tính trung bình đánh giá
-    products = products.map((product) => {
-      const avgReview =
-        product.reviews.length > 0
-          ? product.reviews.reduce((acc, review) => acc + review.rating, 0) /
+    // Apply discount to each product
+    const productsWithDiscount = await Promise.all(
+      products.map(async (product) => {
+        const avgReview =
+          product.reviews.length > 0
+            ? product.reviews.reduce((acc, review) => acc + review.rating, 0) /
             product.reviews.length
-          : 0;
+            : 0;
 
-      return {
-        ...product.toObject(),
-        avgReview,
-      };
-    });
+        const discount = await DiscountService.calculateDiscountForProduct(product._id);
+        const salePrice = discount
+          ? DiscountService.calculateSalePrice(product.price, discount)
+          : product.price;
 
-    return products;
+        return {
+          ...product,
+          avgReview,
+          discount: discount ? {
+            _id: discount._id,
+            name: discount.name,
+            percentage: discount.percentage,
+            endDate: discount.endDate
+          } : null,
+          salePrice
+        };
+      })
+    );
+
+    return productsWithDiscount;
   };
 
   static getTopRatedProduct = async () => {
@@ -207,10 +295,11 @@ class ProductService {
       };
     });
 
-    topRatedProducts.sort((a, b) => b.rating - a.rating);
+    topRatedProducts.sort((a, b) => b.avgReview - a.avgReview);
 
-    return topRatedProducts;
+    return topRatedProducts.slice(0, 8);
   };
+
   static getProductQuantities = async (productId) => {
     const product = await Product.findOne({ _id: productId });
 
@@ -240,6 +329,7 @@ class ProductService {
 
     return product?.sizes;
   };
+
   static createProductQuantities = async (productId, payload) => {
     const product = await Product.findOne({ _id: productId });
 
@@ -247,19 +337,17 @@ class ProductService {
       throw new NotFoundError("Product not found");
     }
 
-    // Cập nhật số lượng trong mảng sizes tương ứng với size nhập vào
     const sizeIndex = product.sizes.findIndex(
       (size) => size._id.toString() === payload.size.toString()
     );
-    // Thêm thông tin nhập hàng vào enteredQuantity
+
     product.enteredQuantity.push({
       quantity: payload.quantity,
       note: payload.note,
-      size: product.sizes[sizeIndex].size, // size sẽ là ObjectId liên kết với size trong mảng sizes
+      size: product.sizes[sizeIndex].size,
     });
 
     if (sizeIndex !== -1) {
-      // Tăng quantity cho size tương ứng
       product.sizes[sizeIndex].quantity += Number(payload.quantity);
     } else {
       throw new NotFoundError("Size not found");
@@ -267,5 +355,219 @@ class ProductService {
     await product.save();
     return product;
   };
+
+  // NEW METHODS
+  static getNewArrivals = async (limit = 8) => {
+    let products = await Product.find({
+      productStatus: "active",
+    })
+      .populate(["reviews", "brand", "category"])
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .lean();
+
+    // Add discount to each product
+    const productsWithDiscount = await Promise.all(
+      products.map(async (product) => {
+        const discount = await DiscountService.calculateDiscountForProduct(product._id);
+        const salePrice = discount
+          ? DiscountService.calculateSalePrice(product.price, discount)
+          : product.price;
+
+        return {
+          ...product,
+          avgReview:
+            product.reviews.length > 0
+              ? product.reviews.reduce((acc, review) => acc + review.rating, 0) /
+              product.reviews.length
+              : 0,
+          discount: discount ? {
+            _id: discount._id,
+            name: discount.name,
+            percentage: discount.percentage,
+            endDate: discount.endDate
+          } : null,
+          salePrice
+        };
+      })
+    );
+
+    return productsWithDiscount;
+  };
+
+  static getBestSellers = async (limit = 8) => {
+    let products = await Product.find({
+      productStatus: "active",
+    })
+      .populate(["reviews", "brand", "category"])
+      .sort({ sold: -1 })
+      .limit(limit)
+      .lean();
+
+    // Add discount to each product
+    const productsWithDiscount = await Promise.all(
+      products.map(async (product) => {
+        const discount = await DiscountService.calculateDiscountForProduct(product._id);
+        const salePrice = discount
+          ? DiscountService.calculateSalePrice(product.price, discount)
+          : product.price;
+
+        return {
+          ...product,
+          avgReview:
+            product.reviews.length > 0
+              ? product.reviews.reduce((acc, review) => acc + review.rating, 0) /
+              product.reviews.length
+              : 0,
+          discount: discount ? {
+            _id: discount._id,
+            name: discount.name,
+            percentage: discount.percentage,
+            endDate: discount.endDate
+          } : null,
+          salePrice
+        };
+      })
+    );
+
+    return productsWithDiscount;
+  };
+
+  static getFeaturedProducts = async (limit = 8) => {
+    const products = await Product.find({
+      productStatus: "active",
+      reviews: { $exists: true, $ne: [] },
+    })
+      .populate(["reviews", "brand", "category"])
+      .lean();
+
+    const maxSellCount = Math.max(
+      ...products.map((p) => p.sellCount || 0),
+      1
+    );
+
+    const featuredProducts = products
+      .map((product) => {
+        const avgReview =
+          product.reviews.length > 0
+            ? product.reviews.reduce((acc, review) => acc + review.rating, 0) /
+            product.reviews.length
+            : 0;
+
+        const normalizedSellCount = (product.sellCount || 0) / maxSellCount;
+        const score = avgReview * 0.7 + normalizedSellCount * 5 * 0.3;
+
+        return { ...product, avgReview, featuredScore: score };
+      })
+      .sort((a, b) => b.featuredScore - a.featuredScore)
+      .slice(0, limit);
+
+    return featuredProducts;
+  };
+
+  static getHomepageData = async () => {
+    const [
+      newArrivals,
+      bestSellers,
+      topRated,
+      featuredProducts,
+      categories,
+      brands,
+    ] = await Promise.all([
+      this.getNewArrivals(8),
+      this.getBestSellers(8),
+      this.getTopRatedProduct(),
+      this.getFeaturedProducts(8),
+      Category.find({ status: "active" }).limit(10).lean(),
+      Brand.find({ status: "active" }).limit(10).lean(),
+    ]);
+
+    const productsByCategory = await Promise.all(
+      categories.slice(0, 3).map(async (category) => {
+        const products = await Product.find({
+          category: category._id,
+          productStatus: "active",
+        })
+          .populate(["reviews", "brand"])
+          .limit(4)
+          .lean();
+
+        const productsWithDiscount = await Promise.all(
+          products.map(async (product) => {
+            const discount = await DiscountService.calculateDiscountForProduct(product._id);
+            const salePrice = discount
+              ? DiscountService.calculateSalePrice(product.price, discount)
+              : product.price;
+
+            return {
+              ...product,
+              avgReview:
+                product.reviews.length > 0
+                  ? product.reviews.reduce(
+                    (acc, review) => acc + review.rating,
+                    0
+                  ) / product.reviews.length
+                  : 0,
+              discount: discount ? {
+                _id: discount._id,
+                name: discount.name,
+                percentage: discount.percentage,
+                endDate: discount.endDate
+              } : null,
+              salePrice
+            };
+          })
+        );
+
+        return { category, products: productsWithDiscount };
+      })
+    );
+
+    return {
+      newArrivals,
+      bestSellers,
+      topRated: topRated.slice(0, 8),
+      featuredProducts,
+      productsByCategory,
+      categories,
+      brands,
+      stats: {
+        totalProducts: await Product.countDocuments({
+          productStatus: "active",
+        }),
+        totalCategories: categories.length,
+        totalBrands: brands.length,
+      },
+    };
+  };
+
+  static getRelatedProducts = async (productId, limit = 4) => {
+    const currentProduct = await Product.findById(productId);
+    if (!currentProduct) {
+      throw new NotFoundError("Product not found");
+    }
+
+    let products = await Product.find({
+      _id: { $ne: productId },
+      $or: [
+        { category: currentProduct.category },
+        { brand: currentProduct.brand },
+      ],
+      productStatus: "active",
+    })
+      .populate(["reviews", "brand", "category"])
+      .limit(limit)
+      .lean();
+
+    return products.map((product) => ({
+      ...product,
+      avgReview:
+        product.reviews.length > 0
+          ? product.reviews.reduce((acc, review) => acc + review.rating, 0) /
+          product.reviews.length
+          : 0,
+    }));
+  };
 }
+
 module.exports = ProductService;

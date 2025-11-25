@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Button, Input, message, Avatar } from "antd"; // Thêm Avatar từ Ant Design
+import { Button, Input, message, Avatar } from "antd";
 import { getUserProfile, updateUserProfile } from "../../service/userService";
+import AddressManager from "../../Components/Address/AddressManager";
+import AvatarUpload from "../../Components/AvatarUpload/AvatarUpload";
 
 const Profile = () => {
   const [userData, setUserData] = useState(null);
@@ -36,7 +38,7 @@ const Profile = () => {
     const res = await updateUserProfile(updatedData);
     if (res.status === 200) {
       message.success("Cập nhật thông tin thành công!");
-      setUserData(updatedData);
+      setUserData({ ...userData, ...updatedData });
       setIsEditing(false);
     } else {
       message.error("Cập nhật thông tin không thành công.");
@@ -51,6 +53,17 @@ const Profile = () => {
     }));
   };
 
+  const handleAvatarUpdate = async (avatarUrl) => {
+    try {
+      const res = await updateUserProfile({ avatar: avatarUrl });
+      if (res.status === 200) {
+        setUserData({ ...userData, avatar: avatarUrl });
+      }
+    } catch (error) {
+      console.error("Failed to update avatar", error);
+    }
+  };
+
   if (!userData) {
     return <div>Đang tải dữ liệu...</div>;
   }
@@ -61,19 +74,16 @@ const Profile = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-8 bg-white rounded-xl border border-slate-300 shadow-lg my-20">
-      <div className="flex items-center mb-8 space-x-6">
-        <Avatar
-          className="bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-xl"
-          size={80}
-        >
-          {avatarText}
-        </Avatar>
-        <div>
-          <h2 className="text-3xl font-semibold text-gray-900">
-            {userData.userName}
-          </h2>
-          <p className="text-lg text-gray-600">{userData.email}</p>
-        </div>
+      {/* Avatar Section */}
+      <div className="flex flex-col items-center mb-8 pb-8 border-b">
+        <AvatarUpload 
+          currentAvatar={userData.avatar} 
+          onUpdate={handleAvatarUpdate}
+        />
+        <h2 className="text-3xl font-semibold text-gray-900 mt-4">
+          {userData.userName}
+        </h2>
+        <p className="text-lg text-gray-600">{userData.email}</p>
       </div>
 
       {/* Hiển thị thông tin và các trường chỉnh sửa */}
@@ -147,6 +157,9 @@ const Profile = () => {
               Cập nhật thông tin
             </Button>
           )}
+        </div>
+        <div className="mt-12 border-t pt-8">
+          <AddressManager mode="manage" />
         </div>
       </div>
     </div>

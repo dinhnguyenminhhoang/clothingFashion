@@ -1,5 +1,5 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
-import { Button, Modal, Popconfirm, Table } from "antd";
+import { Button, Modal, Popconfirm, Table, Image } from "antd";
 import React, { useEffect, useState } from "react";
 import CategoryForm from "../../../Components/FormManage/CategoryForm";
 import useNotification from "../../../hooks/NotiHook";
@@ -10,6 +10,7 @@ import {
   getAllCategory,
 } from "../../../service/categoryService";
 import { formatDateTime } from "../../../utils";
+import { IMAGEURL } from "../../../utils/constant";
 
 const ManagerCategory = () => {
   const openNotification = useNotification();
@@ -80,10 +81,34 @@ const ManagerCategory = () => {
 
   const columns = [
     {
-      title: "Tên nhãn hàng",
+      title: "Ảnh",
+      dataIndex: "image",
+      key: "image",
+      width: 100,
+      render: (image) => (
+        <div className="flex items-center justify-center">
+          {image ? (
+            <Image
+              src={IMAGEURL + image}
+              alt="Category"
+              width={60}
+              height={60}
+              className="rounded-lg object-cover"
+              style={{ objectFit: "cover" }}
+            />
+          ) : (
+            <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400">
+              No Image
+            </div>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: "Tên danh mục",
       dataIndex: "name",
       key: "name",
-      render: (text) => <span>{text}</span>,
+      render: (text) => <span className="font-semibold">{text}</span>,
     },
     {
       title: "Mô tả",

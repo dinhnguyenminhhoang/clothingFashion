@@ -13,7 +13,59 @@ class UserService {
       userName: 1,
       phone: 1,
       email: 1,
+      avatar: 1,
+      address: 1,
     });
+  };
+
+  static addAddress = async (userId, addressData) => {
+    const user = await User.findById(userId);
+    if (!user) throw new badRequestError("User not found");
+
+    if (addressData.isDefault) {
+      user.address.forEach((addr) => (addr.isDefault = false));
+    } else if (user.address.length === 0) {
+      addressData.isDefault = true;
+    }
+
+    user.address.push(addressData);
+    await user.save();
+    return user.address;
+  };
+
+  static updateAddress = async (userId, addressId, addressData) => {
+    const user = await User.findById(userId);
+    if (!user) throw new badRequestError("User not found");
+
+    const addressIndex = user.address.findIndex(
+      (addr) => addr._id.toString() === addressId
+    );
+    if (addressIndex === -1) throw new badRequestError("Address not found");
+
+    if (addressData.isDefault) {
+      user.address.forEach((addr) => (addr.isDefault = false));
+    }
+
+    user.address[addressIndex] = { ...user.address[addressIndex].toObject(), ...addressData };
+    await user.save();
+    return user.address;
+  };
+
+  static deleteAddress = async (userId, addressId) => {
+    const user = await User.findById(userId);
+    if (!user) throw new badRequestError("User not found");
+
+    user.address = user.address.filter(
+      (addr) => addr._id.toString() !== addressId
+    );
+    await user.save();
+    return user.address;
+  };
+
+  static getAddresses = async (userId) => {
+    const user = await User.findById(userId).select("address");
+    if (!user) throw new badRequestError("User not found");
+    return user.address;
   };
   static updateProfile = async (payload, user) => {
     return await User.findByIdAndUpdate(user.userId, payload, {

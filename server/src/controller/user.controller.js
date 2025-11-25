@@ -9,6 +9,34 @@ class UserController {
       data: await UserService.getUserInfo(req.user),
     }).send(res);
   };
+
+  addAddress = async (req, res, next) => {
+    new SuccessResponse({
+      data: await UserService.addAddress(req.user.userId, req.body),
+    }).send(res);
+  };
+
+  updateAddress = async (req, res, next) => {
+    new SuccessResponse({
+      data: await UserService.updateAddress(
+        req.user.userId,
+        req.params.addressId,
+        req.body
+      ),
+    }).send(res);
+  };
+
+  deleteAddress = async (req, res, next) => {
+    new SuccessResponse({
+      data: await UserService.deleteAddress(req.user.userId, req.params.addressId),
+    }).send(res);
+  };
+
+  getAddresses = async (req, res, next) => {
+    new SuccessResponse({
+      data: await UserService.getAddresses(req.user.userId),
+    }).send(res);
+  };
   updateProfile = async (req, res, next) => {
     new SuccessResponse({
       data: await UserService.updateProfile(req.body, req.user),

@@ -1,24 +1,43 @@
-import { EyeOutlined, ShoppingCartOutlined } from "@ant-design/icons";
-import { Button, Rate, message } from "antd";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Button, Rate, message } from "antd";
+import {
+  EyeOutlined,
+  ShoppingCartOutlined,
+  HeartOutlined,
+  HeartFilled,
+} from "@ant-design/icons";
 import { formatCurrencyVND } from "../../utils";
 import { IMAGEURL } from "../../utils/constant";
+import { useWishlist } from "../../context/WishlistContext";
+import CountdownTimer from "../CountdownTimer/CountdownTimer";
+import { TrustBadges, SoldCountBadge } from "../TrustBadge/TrustBadge";
 
-const ProductItem = ({ product }) => {
+const ProductItem = ({ product, onQuickView }) => {
   const navigator = useNavigate();
-  const { _id, img, title, price, avgReview, reviews, status, sizes } =
+  const { toggleWishlist, isInWishlist } = useWishlist();
+  const { _id, img, title, price, avgReview, reviews, status, sizes, discount, salePrice } =
     product || {};
 
   const [selectedSize, setSelectedSize] = useState(
     sizes?.find((size) => size.quantity > 0)?.size
   );
+  const [isHovered, setIsHovered] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const handleSizeClick = (size) => {
     setSelectedSize(size);
   };
 
-  const handleAddToCart = () => {
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
     if (!selectedSize) {
       message.warning("Vui lòng chọn size trước khi thêm vào giỏ hàng!");
       return;
@@ -28,7 +47,6 @@ const ProductItem = ({ product }) => {
       ? JSON.parse(localStorage.getItem("cart"))
       : [];
 
-    // Kiểm tra sản phẩm đã tồn tại trong giỏ hàng chưa
     const productIndex = cart.findIndex(
       (item) => item._id === _id && item.size === selectedSize
     );
@@ -39,107 +57,236 @@ const ProductItem = ({ product }) => {
       cart.push({
         _id,
         title,
-        price,
+        price: salePrice || price,
+        originalPrice: price,
         img,
         size: selectedSize,
         quantity: 1,
+        discount: discount || null,
       });
     }
     localStorage.setItem("cart", JSON.stringify(cart));
-    message.success("Sản phẩm đã được thêm vào giỏ hàng!");
+
+    // Dispatch event to update cart count
+    window.dispatchEvent(new Event("cartUpdated"));
+
+    message.success("Đã thêm vào giỏ hàng!");
   };
 
+  const handleWishlistToggle = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleWishlist(_id);
+  };
+
+  // Check if product is new (created within last 7 days)
+  const isNew = product?.createdAt
+    ? new Date() - new Date(product.createdAt) < 7 * 24 * 60 * 60 * 1000
+    : false;
+
   return (
-    <div className="bg-white shadow-md rounded-lg overflow-hidden">
-      <div className="relative group">
-        <Link to={`/product-detail/${_id}`} className="block">
-          <img
-            src={IMAGEURL + img}
-            alt="product img"
-            width={284}
-            height={302}
-            className="w-full h-[420px] object-cover"
-          />
-        </Link>
-        {status === "out-of-stock" && (
-          <div className="absolute top-2 left-2 bg-red-500 text-white text-sm px-3 py-1 rounded">
-            Hết hàng
-          </div>
-        )}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black bg-opacity-50">
-          <div className="flex flex-col space-y-2">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -6 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      className="group relative bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-200"
+      style={{ willChange: "transform" }}
+    >
+      {/* Image Container */}
+      <Link to={`/product-detail/${_id}`} className="block relative overflow-hidden">
+        <div className="aspect-[3/4] bg-gray-100 relative">
+          {imageError ? (
+            <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100">
+              <div className="text-6xl mb-2">👕</div>
+              <p className="text-gray-400 text-sm font-medium">Hình ảnh không khả dụng</p>
+            </div>
+          ) : (
+            <img
+              src={IMAGEURL + img}
+              alt={title}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              loading="lazy"
+              onError={handleImageError}
+            />
+          )}
+
+          {/* Overlay Gradient */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+
+          {/* Quick Actions Overlay - Mobile-optimized touch targets */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: isHovered ? 1 : 0 }}
+            transition={{ duration: 0.15 }}
+            className="absolute inset-0 flex items-center justify-center gap-3"
+          >
             <Button
-              onClick={() => navigator(`/product-detail/${_id}`)}
-              icon={<EyeOutlined className="text-2xl" />}
-              className="py-5 px-4 bg-white text-black rounded-full hover:bg-gray-200"
-            >
-              Xem chi tiết
-            </Button>
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (onQuickView) {
+                  onQuickView(product);
+                } else {
+                  navigator(`/product-detail/${_id}`);
+                }
+              }}
+              icon={<EyeOutlined />}
+              className="bg-white/90 backdrop-blur-sm border-none hover:bg-white hover:scale-110 transition-all"
+              shape="circle"
+              size="large"
+              style={{ minWidth: '48px', minHeight: '48px' }}
+            />
             <Button
               onClick={handleAddToCart}
-              icon={<ShoppingCartOutlined className="text-2xl" />}
-              className="py-5 px-4 bg-white text-black rounded-full hover:bg-gray-200 disabled:bg-slate-100"
+              icon={<ShoppingCartOutlined />}
+              className="bg-gradient-to-r from-red-600 to-pink-600 text-white border-none hover:scale-110 transition-all shadow-lg"
+              shape="circle"
+              size="large"
               disabled={status === "out-of-stock"}
-            >
-              Thêm vào giỏ
-            </Button>
-          </div>
-        </div>
-      </div>
-      <div className="p-4">
-        <div className="flex items-center gap-2">
-          {sizes?.length
-            ? sizes.map((size) => (
-                <div key={size.size} className="relative group">
-                  <Button
-                    className={`font-bold ${
-                      selectedSize === size.size
-                        ? "bg-blue-500 text-white"
-                        : size.quantity === 0
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      size.quantity > 0 && handleSizeClick(size.size)
-                    }
-                    disabled={size.quantity === 0}
-                  >
-                    {size.size}
-                  </Button>
-
-                  {size.quantity === 0 && (
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-[2px] bg-red-500 rotate-45 pointer-events-none"></div>
-                  )}
-
-                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 pointer-events-none">
-                    {size.quantity === 0
-                      ? "Hết hàng"
-                      : `Còn lại: ${size.quantity}`}
-                  </div>
-                </div>
-              ))
-            : null}
-        </div>
-
-        <h3 className="text-lg font-medium text-gray-800 mt-2">
-          <Link to={`/product-detail/${_id}`}>{title}</Link>
-        </h3>
-        <div className="mt-2 flex items-center space-x-2">
-          <span className="text-lg font-semibold text-gray-800">
-            {formatCurrencyVND(price)}
-          </span>
-          <div className="flex items-center gap-4">
-            <Rate
-              disabled
-              defaultValue={avgReview || 5}
-              allowHalf
-              className="text-yellow-500"
+              style={{ minWidth: '48px', minHeight: '48px' }}
             />
-            <span>({reviews?.length})</span>
+          </motion.div>
+        </div>
+
+        {/* Badges */}
+        <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
+          {status === "out-of-stock" && (
+            <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+              Hết hàng
+            </span>
+          )}
+          {discount && status === "in-stock" && (
+            <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse">
+              -{typeof discount === 'object' ? discount.percentage : discount}%
+            </span>
+          )}
+          {isNew && status === "in-stock" && !discount && (
+            <motion.span
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ repeat: Infinity, duration: 2 }}
+              className="bg-gradient-to-r from-green-400 to-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full"
+            >
+              ✨ Mới
+            </motion.span>
+          )}
+        </div>
+
+        {/* Wishlist Button */}
+        <motion.button
+          whileHover={{ scale: 1.2 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={handleWishlistToggle}
+          className="absolute top-3 right-3 w-10 h-10 flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:shadow-xl transition-all"
+        >
+          {isInWishlist(_id) ? (
+            <HeartFilled className="text-red-500 text-xl" />
+          ) : (
+            <HeartOutlined className="text-gray-700 text-xl" />
+          )}
+        </motion.button>
+      </Link>
+
+      {/* Product Info */}
+      <div className="p-4 space-y-3">
+        {/* Sizes */}
+        {sizes?.length > 0 && (
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {sizes.slice(0, 4).map((size) => (
+              <button
+                key={size.size}
+                onClick={() => size.quantity > 0 && handleSizeClick(size.size)}
+                disabled={size.quantity === 0}
+                className={`
+                  px-2.5 py-1 text-xs font-bold rounded-md transition-all
+                  ${selectedSize === size.size
+                    ? "bg-black text-white"
+                    : size.quantity === 0
+                      ? "bg-gray-200 text-gray-400 line-through cursor-not-allowed"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }
+                `}
+              >
+                {size.size}
+              </button>
+            ))}
           </div>
+        )}
+
+        {/* Title */}
+        <Link to={`/product-detail/${_id}`}>
+          <h3 className="font-bold text-gray-900 text-base line-clamp-2 hover:text-blue-600 transition-colors">
+            {title}
+          </h3>
+        </Link>
+
+        {/* Rating & Reviews - Prominent like Vietnamese e-commerce */}
+        <div className="flex items-center gap-2">
+          <Rate
+            disabled
+            defaultValue={avgReview || 5}
+            allowHalf
+            className="text-base"
+            style={{ fontSize: 16, color: '#FFD60A' }}
+          />
+          <span className="text-sm text-gray-700 font-medium">
+            {avgReview ? avgReview.toFixed(1) : '5.0'}
+          </span>
+          <span className="text-xs text-gray-500">({reviews?.length || 0})</span>
+        </div>
+
+        {/* Price */}
+        <div className="flex items-center justify-between">
+          {discount || salePrice ? (
+            <div className="flex flex-col">
+              <span className="text-xl font-black text-red-600">
+                {formatCurrencyVND(salePrice || price)}
+              </span>
+              <span className="text-xs text-gray-400 line-through">
+                {formatCurrencyVND(price)}
+              </span>
+            </div>
+          ) : (
+            <span className="text-xl font-black text-gray-900">
+              {formatCurrencyVND(price)}
+            </span>
+          )}
+        </div>
+
+        {/* Flash Sale Countdown - Small badge below price */}
+        {discount && typeof discount === 'object' && discount.endDate &&
+          (new Date(discount.endDate) - new Date()) < (7 * 24 * 60 * 60 * 1000) &&
+          (new Date(discount.endDate) - new Date()) > 0 && (
+            <div className="mt-2 inline-flex items-center gap-1.5 bg-gradient-to-r from-orange-100 to-red-100 border border-orange-300 rounded-lg px-2 py-1">
+              <span className="text-orange-600 text-xs">⚡</span>
+              <span className="text-orange-700 font-bold text-xs">Flash Sale:</span>
+              <CountdownTimer endDate={discount.endDate} compact={true} />
+            </div>
+          )}
+
+        {/* Trust Badges - Vietnamese E-commerce Style */}
+        <div className="mt-2 space-y-2">
+          {/* Sold Count - Very important in VN market! */}
+          {product.sold && (
+            <SoldCountBadge count={product.sold} />
+          )}
+
+          {/* Trust Badges Row */}
+          <TrustBadges
+            badges={[
+              ...(status === "in-stock" ? [{ type: 'freeship', text: 'Freeship' }] : []),
+              { type: 'authentic', text: 'Chính hãng' },
+              ...(discount ? [{ type: 'hot', text: 'Hot' }] : []),
+            ]}
+          />
         </div>
       </div>
-    </div>
+
+      {/* Bottom Glow Effect */}
+      <div className="absolute -bottom-1 left-0 right-0 h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
+    </motion.div>
   );
 };
 

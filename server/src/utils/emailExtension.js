@@ -4,30 +4,29 @@ const orderContent = (order) => {
             <h2 style="color: #4CAF50;">Chi tiết đơn hàng</h2>
             <ul style="list-style-type: none; padding: 0;">
               ${order?.cart
-                ?.map(
-                  (item) => `
+      ?.map(
+        (item) => `
                     <li style="margin-bottom: 8px;margin-left:0">
                       <strong>${item.productName}</strong> - 
                       Số lượng: <strong>${item.quantity}</strong>, 
                       Kích thước: <strong>${item.size}</strong>
                     </li>`
-                )
-                .join("")}
+      )
+      .join("")}
             </ul>
             <p><strong>Tổng tiền:</strong> ${order.totalAmount.toLocaleString(
-              "vi-VN",
-              {
-                style: "currency",
-                currency: "VND",
-              }
-            )}</p>
+        "vi-VN",
+        {
+          style: "currency",
+          currency: "VND",
+        }
+      )}</p>
             <p><strong>Số điện thoại:</strong> ${order.phone}</p>
             <p><strong>Địa chỉ:</strong> ${order.address}</p>
-            <p><strong>Phương thức thanh toán:</strong> ${
-              order.paymentMethod === "cash"
-                ? "Thanh toán khi nhận hàng"
-                : "Thanh toán qua thẻ"
-            }</p>
+            <p><strong>Phương thức thanh toán:</strong> ${order.paymentMethod === "cash"
+      ? "Thanh toán khi nhận hàng"
+      : "Thanh toán qua thẻ"
+    }</p>
           </div>
           <p style="margin-top: 20px;">Nếu bạn có bất kỳ thắc mắc nào, vui lòng liên hệ chúng tôi qua email hoặc hotline của cửa hàng.</p>
           <p style="text-align: center; color: #888; font-size: 0.9em; margin-top: 30px;">
@@ -35,6 +34,7 @@ const orderContent = (order) => {
           </p>
         </div>`;
 };
+
 const confirmOrderForm = (order) => {
   return {
     title: "Thông tin đơn hàng của bạn",
@@ -48,6 +48,7 @@ const confirmOrderForm = (order) => {
       `,
   };
 };
+
 const processingOrderForm = (orderId, order) => {
   return {
     title: `Đơn hàng #${orderId} của bạn đang được xử lý`,
@@ -87,6 +88,90 @@ const cancelOrderForm = (orderId, order) => {
       `,
   };
 };
+
+// ==================== EMAIL TEMPLATES VỚI MÃ 6 SỐ ====================
+
+const confirmAccountCodeForm = (userName, verificationCode) => {
+  return {
+    title: "Xác thực tài khoản của bạn",
+    body: `
+      <div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px; color: #333;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+          <div style="background-color: #28a745; padding: 20px; text-align: center; color: #ffffff;">
+            <h1 style="margin: 0; font-size: 24px;">Xác thực tài khoản</h1>
+          </div>
+          <div style="padding: 30px 20px;">
+            <p>Xin chào <strong>${userName || "bạn"}</strong>,</p>
+            <p>Cảm ơn bạn đã đăng ký tài khoản tại hệ thống của chúng tôi. Để hoàn tất quá trình đăng ký, vui lòng sử dụng mã xác thực bên dưới:</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <div style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
+                <p style="margin: 0; color: #ffffff; font-size: 14px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px;">Mã xác thực của bạn</p>
+                <p style="margin: 0; color: #ffffff; font-size: 36px; font-weight: bold; letter-spacing: 8px; font-family: 'Courier New', monospace;">${verificationCode}</p>
+              </div>
+            </div>
+
+            <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin: 20px 0; border-radius: 4px;">
+              <p style="margin: 0; color: #856404; font-size: 14px;">
+                <strong>⚠️ Lưu ý:</strong> Mã xác thực này có hiệu lực trong <strong>15 phút</strong>.
+              </p>
+            </div>
+
+            <p style="font-size: 14px; color: #666;">Nếu bạn không yêu cầu đăng ký tài khoản, vui lòng bỏ qua email này.</p>
+            
+            <p style="margin-top: 30px;">Trân trọng,<br/><strong>Đội ngũ hỗ trợ</strong></p>
+          </div>
+          <div style="background-color: #f1f1f1; text-align: center; padding: 15px; font-size: 12px; color: #666;">
+            <p style="margin: 0;">Email này được gửi tự động từ hệ thống, vui lòng không trả lời.</p>
+            <p style="margin: 5px 0 0 0;">Nếu bạn có bất kỳ câu hỏi nào, hãy liên hệ với bộ phận hỗ trợ của chúng tôi.</p>
+          </div>
+        </div>
+      </div>
+      `,
+  };
+};
+
+const resetPasswordCodeForm = (userName, verificationCode) => {
+  return {
+    title: "Đặt lại mật khẩu của bạn",
+    body: `
+      <div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px; color: #333;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+          <div style="background-color: #007bff; padding: 20px; text-align: center; color: #ffffff;">
+            <h1 style="margin: 0; font-size: 24px;">Đặt lại mật khẩu</h1>
+          </div>
+          <div style="padding: 30px 20px;">
+            <p>Xin chào <strong>${userName || "bạn"}</strong>,</p>
+            <p>Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn. Vui lòng sử dụng mã xác thực bên dưới để tiếp tục:</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <div style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
+                <p style="margin: 0; color: #ffffff; font-size: 14px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px;">Mã xác thực của bạn</p>
+                <p style="margin: 0; color: #ffffff; font-size: 36px; font-weight: bold; letter-spacing: 8px; font-family: 'Courier New', monospace;">${verificationCode}</p>
+              </div>
+            </div>
+
+            <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin: 20px 0; border-radius: 4px;">
+              <p style="margin: 0; color: #856404; font-size: 14px;">
+                <strong>⚠️ Lưu ý:</strong> Mã xác thực này có hiệu lực trong <strong>15 phút</strong>.
+              </p>
+            </div>
+
+            <p style="font-size: 14px; color: #666;">Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này và mật khẩu của bạn sẽ không thay đổi.</p>
+            
+            <p style="margin-top: 30px;">Trân trọng,<br/><strong>Đội ngũ hỗ trợ</strong></p>
+          </div>
+          <div style="background-color: #f1f1f1; text-align: center; padding: 15px; font-size: 12px; color: #666;">
+            <p style="margin: 0;">Email này được gửi tự động từ hệ thống, vui lòng không trả lời.</p>
+            <p style="margin: 5px 0 0 0;">Nếu bạn có bất kỳ câu hỏi nào, hãy liên hệ với bộ phận hỗ trợ của chúng tôi.</p>
+          </div>
+        </div>
+      </div>
+      `,
+  };
+};
+
+// Giữ lại các hàm cũ cho tương thích ngược (với link)
 const resetPasswordForm = (resetLink) => {
   return {
     title: "Đặt lại mật khẩu của bạn",
@@ -118,6 +203,7 @@ const resetPasswordForm = (resetLink) => {
       `,
   };
 };
+
 const confirmAccountForm = (confirmLink) => {
   return {
     title: "Xác nhận tài khoản của bạn",
@@ -148,6 +234,7 @@ const confirmAccountForm = (confirmLink) => {
       `,
   };
 };
+
 const receiveReportEmailForm = (name, phone, subject, message) => {
   return {
     title: `${subject} - ${name} - ${phone}`,
@@ -159,6 +246,7 @@ const receiveReportEmailForm = (name, phone, subject, message) => {
       `,
   };
 };
+
 const replyReportEmailForm = (customerName, reportTitle, replyMessage) => {
   return {
     title: `Phản hồi: ${reportTitle} - ${customerName}`,
@@ -188,4 +276,6 @@ module.exports = {
   confirmAccountForm,
   receiveReportEmailForm,
   replyReportEmailForm,
+  confirmAccountCodeForm,
+  resetPasswordCodeForm,
 };

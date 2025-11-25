@@ -88,5 +88,22 @@ class ReviewService {
       throw new NotFoundError("Product reviews not found");
     return "All reviews deleted for the product";
   };
+
+  static getHighRatedReviews = async ({ limit = 10 }) => {
+    const reviews = await Review.find({ rating: { $gte: 4 } })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .populate({
+        path: "user",
+        select: "userName avatar",
+      })
+      .populate({
+        path: "product",
+        select: "title img",
+      })
+      .lean();
+
+    return reviews;
+  };
 }
 module.exports = ReviewService;

@@ -15,12 +15,17 @@ const { findByEmail } = require("../models/repo/user.repo");
 const { getInfoData } = require("../utils");
 const sendEmail = require("../helpers/sendEmail");
 const {
-  resetPasswordForm,
-  confirmAccountForm,
+  resetPasswordCodeForm,
+  confirmAccountCodeForm,
 } = require("../utils/emailExtension");
+
 const RolesUser = {
   USER: "USER",
   ADMIN: "ADMIN",
+};
+
+const generateVerificationCode = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
 class AccessService {
@@ -30,6 +35,10 @@ class AccessService {
       throw new badRequestError("error user already rigisted");
     }
     const passwordHash = await bcrypt.hash(password, 10);
+
+    const verificationCode = generateVerificationCode();
+    const verificationCodeExpiry = new Date(Date.now() + 15 * 60 * 1000);
+
     const user = await User.create({
       userName,
       email,
@@ -37,46 +46,120 @@ class AccessService {
       password: passwordHash,
       roles: [RolesUser.USER],
       status: "inActive",
+      verificationCode,
+      verificationCodeExpiry,
+      verificationCodeType: "confirm",
     });
-    const key = crypto.randomBytes(64).toString(`hex`);
-    const tokens = await createTokenPair(
-      {
-        userId: user._id,
-        email: user.email,
-        userName: user.userName,
-        phone: user.phone,
-        type: "confirm",
-      },
-      key
+
+    const confirmAccountFormContent = confirmAccountCodeForm(
+      userName,
+      verificationCode
     );
-    await KeyTokenService.createKeyToken({
-      userId: user._id,
-      key,
-    });
-    const confirmAccountLink = `${process.env.BASE_URL_CLIENT}/confirm-account/${tokens.accessToken}`;
-    const confirmAccountFormContent = confirmAccountForm(confirmAccountLink);
     await sendEmail(
       user.email,
       confirmAccountFormContent.title,
       confirmAccountFormContent.body
     );
+
     return {
-      data: null,
+      message: "Mã xác thực đã được gửi đến email của bạn. Vui lòng kiểm tra email.",
+      data: {
+        email: user.email,
+      },
     };
   };
+
+  static verifyAccount = async ({ email, code }) => {
+    const user = await User.findOne({ email }).lean();
+
+    if (!user) {
+      throw new NotFoundError("Không tìm thấy tài khoản");
+    }
+
+    if (user.status === "active") {
+      throw new badRequestError("Tài khoản đã được kích hoạt");
+    }
+
+    if (user.verificationCode !== code) {
+      throw new badRequestError("Mã xác thực không đúng");
+    }
+
+    if (new Date() > new Date(user.verificationCodeExpiry)) {
+      throw new badRequestError("Mã xác thực đã hết hạn");
+    }
+
+    if (user.verificationCodeType !== "confirm") {
+      throw new badRequestError("Mã xác thực không hợp lệ");
+    }
+
+    await User.findOneAndUpdate(
+      { email },
+      {
+        status: "active",
+        verificationCode: null,
+        verificationCodeExpiry: null,
+        verificationCodeType: null,
+      }
+    );
+
+    return {
+      message: "Xác thực tài khoản thành công",
+    };
+  };
+
+  static resendVerificationCode = async ({ email }) => {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      throw new NotFoundError("Không tìm thấy tài khoản");
+    }
+
+    if (user.status === "active") {
+      throw new badRequestError("Tài khoản đã được kích hoạt");
+    }
+
+    const verificationCode = generateVerificationCode();
+    const verificationCodeExpiry = new Date(Date.now() + 15 * 60 * 1000);
+
+    await User.findOneAndUpdate(
+      { email },
+      {
+        verificationCode,
+        verificationCodeExpiry,
+        verificationCodeType: "confirm",
+      }
+    );
+
+    const confirmAccountFormContent = confirmAccountCodeForm(
+      user.userName,
+      verificationCode
+    );
+    await sendEmail(
+      user.email,
+      confirmAccountFormContent.title,
+      confirmAccountFormContent.body
+    );
+
+    return {
+      message: "Mã xác thực mới đã được gửi đến email của bạn",
+    };
+  };
+
   static login = async ({ email, password }) => {
     const foundUser = await findByEmail({
       email,
     });
-    console.log("foundUser", foundUser);
+
     if (!foundUser) {
       throw new badRequestError("user not registered");
     }
     if (foundUser.status !== "active")
-      throw new badRequestError("Tài khoản bị khóa");
+      throw new badRequestError("Tài khoản bị khóa hoặc chưa được kích hoạt");
+
     const { _id: userId, userName, roles, phone } = foundUser;
     const match = await bcrypt.compare(password, foundUser.password);
     if (!match) throw new AuthFailureError("Authentication Error");
+
     const key = crypto.randomBytes(64).toString(`hex`);
     const tokens = await createTokenPair(
       {
@@ -101,49 +184,104 @@ class AccessService {
       tokens,
     };
   };
+
   static forgotPassword = async (payload) => {
     const { email } = payload;
-    const user = await findByEmail({ email });
-    if (!user?._id) throw new NotFoundError("Not found User");
-    const key = crypto.randomBytes(64).toString(`hex`);
-    const tokens = await createTokenPair(
+    const user = await User.findOne({ email });
+
+    if (!user) throw new NotFoundError("Không tìm thấy tài khoản");
+
+    const verificationCode = generateVerificationCode();
+    const verificationCodeExpiry = new Date(Date.now() + 15 * 60 * 1000);
+
+    await User.findOneAndUpdate(
+      { email },
       {
-        userId: user._id,
-        email: user.email,
-        userName: user.userName,
-        phone: user.phone,
-        type: "resetPassword",
-      },
-      key
+        verificationCode,
+        verificationCodeExpiry,
+        verificationCodeType: "resetPassword",
+      }
     );
-    await KeyTokenService.createKeyToken({
-      userId: user._id,
-      key,
-    });
-    const resetLink = `${process.env.BASE_URL_CLIENT}/reset-password/${tokens.accessToken}`;
-    const resetPasswordFormContent = resetPasswordForm(resetLink);
+
+    const resetPasswordFormContent = resetPasswordCodeForm(
+      user.userName,
+      verificationCode
+    );
     await sendEmail(
       user.email,
       resetPasswordFormContent.title,
       resetPasswordFormContent.body
     );
-    return "OK";
+
+    return {
+      message: "Mã xác thực đã được gửi đến email của bạn",
+      data: {
+        email: user.email,
+      },
+    };
   };
-  static resetPassword = async (payload, user, keyStore) => {
-    const { userId, email } = user;
-    const { password } = payload;
-    const userExiting = await findByEmail({ email });
-    if (!userExiting?._id && userId) throw new NotFoundError("Not found User");
+
+  static verifyResetCode = async ({ email, code }) => {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      throw new NotFoundError("Không tìm thấy tài khoản");
+    }
+
+    if (user.verificationCode !== code) {
+      throw new badRequestError("Mã xác thực không đúng");
+    }
+
+    if (new Date() > new Date(user.verificationCodeExpiry)) {
+      throw new badRequestError("Mã xác thực đã hết hạn");
+    }
+
+    if (user.verificationCodeType !== "resetPassword") {
+      throw new badRequestError("Mã xác thực không hợp lệ");
+    }
+
+    return {
+      message: "Mã xác thực hợp lệ",
+      data: {
+        email: user.email,
+      },
+    };
+  };
+
+  static resetPassword = async ({ email, code, password }) => {
+    const user = await User.findOne({ email });
+
+    if (!user) throw new NotFoundError("Không tìm thấy tài khoản");
+
+    if (user.verificationCode !== code) {
+      throw new badRequestError("Mã xác thực không đúng");
+    }
+
+    if (new Date() > new Date(user.verificationCodeExpiry)) {
+      throw new badRequestError("Mã xác thực đã hết hạn");
+    }
+
+    if (user.verificationCodeType !== "resetPassword") {
+      throw new badRequestError("Mã xác thực không hợp lệ");
+    }
+
     const passwordHash = await bcrypt.hash(password, 10);
-    const userUpdated = await User.findOneAndUpdate(userExiting._id, {
-      ...userExiting,
-      password: passwordHash,
-    });
-    if (userUpdated) {
-      await KeyTokenService.removeKeyById(keyStore._id);
-    } else throw badRequestError("reset password faild");
-    return "OK";
+
+    await User.findOneAndUpdate(
+      { email },
+      {
+        password: passwordHash,
+        verificationCode: null,
+        verificationCodeExpiry: null,
+        verificationCodeType: null,
+      }
+    );
+
+    return {
+      message: "Đặt lại mật khẩu thành công",
+    };
   };
+
   static confirmAccount = async (user, keyStore) => {
     const { userId, email } = user;
     const userExiting = await findByEmail({ email });
@@ -157,9 +295,11 @@ class AccessService {
     } else throw badRequestError("reset password faild");
     return "OK";
   };
+
   static Logout = async (keyStore) => {
     const delKey = await KeyTokenService.removeKeyById(keyStore._id);
     return delKey;
   };
 }
+
 module.exports = AccessService;

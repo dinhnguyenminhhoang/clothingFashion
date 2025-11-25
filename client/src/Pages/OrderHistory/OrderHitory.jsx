@@ -14,7 +14,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { MdCancel } from "react-icons/md";
 import { getOrderByUser, userUpdateStatus } from "../../service/orderService";
-import { userReview } from "../../service/reviewService";
+import { createReview } from "../../service/reviewService";
 import { formatCurrencyVND } from "../../utils";
 import OrderDetail from "../../Components/OrderDetail/OrderDetail";
 
@@ -59,9 +59,20 @@ const OrderHistory = () => {
     },
     {
       title: "Tổng tiền",
-      dataIndex: "totalAmount",
-      key: "totalAmount",
-      render: (text) => formatCurrencyVND(text),
+      key: "amount",
+      render: (_, record) => (
+        <div>
+          <div className="font-bold text-green-600">
+            {formatCurrencyVND(record.finalAmount || record.totalAmount)}
+          </div>
+          {record.voucher?.code && (
+            <div className="text-xs text-gray-500">
+              <Tag color="red" className="mt-1">{record.voucher.code}</Tag>
+              <div>Giảm: {formatCurrencyVND(record.voucher.discount)}</div>
+            </div>
+          )}
+        </div>
+      ),
     },
     {
       title: "Phương thức thanh toán",
@@ -178,7 +189,7 @@ const OrderHistory = () => {
 
     try {
       const reviewPromises = selectedOrder?.cart?.map((element) =>
-        userReview({
+        createReview({
           product: element.product._id,
           rating: reviewRating,
           comment: reviewText,

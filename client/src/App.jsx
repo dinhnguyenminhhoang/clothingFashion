@@ -28,6 +28,9 @@ import ConfirmAccoount from "./Pages/Auth/ConfirmAccount/ConfirmAccoount";
 import ManagerContact from "./Pages/admin/ManagerContact/ManagerContact";
 import ManagerCategory from "./Pages/admin/ManagerCategory/ManagerCategory";
 import ManagerChatbot from "./Pages/admin/ManagerChatbot/ManagerChatbot";
+import VoucherManagement from "./Pages/Admin/VoucherManagement";
+import ManagerDiscount from "./Pages/admin/ManagerDiscount/ManagerDiscount";
+import Wishlist from "./Pages/Wishlist/Wishlist";
 import VnpayReturn from "./Pages/VnpayReturn/VnpayReturn";
 const App = () => {
   const router = createBrowserRouter(
@@ -50,6 +53,7 @@ const App = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/history-order" element={<OrderHitory />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/wishlist" element={<Wishlist />} />
         </Route>
         <Route element={<AdminLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
@@ -64,6 +68,8 @@ const App = () => {
             path="/manager-quantity/:productId"
             element={<ManagerQuantityProduct />}
           />
+          <Route path="/manager-voucher" element={<VoucherManagement />} />
+          <Route path="/manager-discount" element={<ManagerDiscount />} />
         </Route>
       </Route>
     )
