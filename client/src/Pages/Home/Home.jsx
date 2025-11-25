@@ -50,9 +50,9 @@ const Home = () => {
   return (
     <>
       <HomeHeroSlider />
-      
+
       <FeaturedCategories />
-      
+
       <ProductArea />
 
       {/* New Arrivals - Sản phẩm mới */}
@@ -64,7 +64,7 @@ const Home = () => {
           />
           <div className="flex justify-center items-center">
             <div className="container">
-              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-6">
                 {homepageData.newArrivals.map((product) => (
                   <ProductItem key={product._id} product={product} onQuickView={handleQuickView} />
                 ))}
@@ -85,7 +85,7 @@ const Home = () => {
           />
           <div className="flex justify-center items-center">
             <div className="container">
-              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-6">
                 {homepageData.bestSellers.map((product) => (
                   <ProductItem key={product._id} product={product} onQuickView={handleQuickView} />
                 ))}
@@ -104,7 +104,7 @@ const Home = () => {
           />
           <div className="flex justify-center items-center">
             <div className="container">
-              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-6">
                 {homepageData.topRated.map((product) => (
                   <ProductItem key={product._id} product={product} onQuickView={handleQuickView} />
                 ))}
@@ -128,7 +128,7 @@ const Home = () => {
           />
           <div className="flex justify-center items-center">
             <div className="container">
-              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-6">
                 {categoryData.products.map((product) => (
                   <ProductItem key={product._id} product={product} onQuickView={handleQuickView} />
                 ))}
@@ -147,7 +147,7 @@ const Home = () => {
           />
           <div className="flex justify-center items-center">
             <div className="container">
-              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-6">
                 {homepageData.featuredProducts.map((product) => (
                   <ProductItem key={product._id} product={product} onQuickView={handleQuickView} />
                 ))}
@@ -156,9 +156,9 @@ const Home = () => {
           </div>
         </section>
       )}
-      
+
       <Newsletter />
-      
+
       <QuickViewModal
         product={quickViewProduct}
         visible={showQuickView}

@@ -204,10 +204,12 @@ discountSchema.methods.appliesToProduct = function (product) {
             return this.product && this.product.toString() === product._id.toString();
 
         case DISCOUNT_TYPES.BRAND:
-            return this.brand && this.brand.toString() === product.brand.toString();
+            const brandId = product.brand?._id || product.brand;
+            return this.brand && brandId && this.brand.toString() === brandId.toString();
 
         case DISCOUNT_TYPES.CATEGORY:
-            return this.category && this.category.toString() === product.category.toString();
+            const categoryId = product.category?._id || product.category;
+            return this.category && categoryId && this.category.toString() === categoryId.toString();
 
         case DISCOUNT_TYPES.PRODUCT_LIST:
             return this.products.some(pid => pid.toString() === product._id.toString());

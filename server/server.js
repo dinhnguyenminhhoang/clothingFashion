@@ -1,5 +1,5 @@
 const app = require("./src/app");
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3055;
 
 // Chỉ lắng nghe port khi chạy ở môi trường local (không phải trên Vercel)
 if (process.env.NODE_ENV !== 'production') {

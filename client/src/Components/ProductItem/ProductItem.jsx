@@ -92,36 +92,35 @@ const ProductItem = ({ product, onQuickView }) => {
       transition={{ duration: 0.2, ease: "easeOut" }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
-      className="group relative bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-200"
+      className="group relative bg-white rounded-2xl md:rounded-2xl rounded-lg overflow-hidden shadow-md hover:shadow-2xl transition-all duration-200"
       style={{ willChange: "transform" }}
     >
       {/* Image Container */}
       <Link to={`/product-detail/${_id}`} className="block relative overflow-hidden">
-        <div className="aspect-[3/4] bg-gray-100 relative">
-          {imageError ? (
-            <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100">
-              <div className="text-6xl mb-2">👕</div>
-              <p className="text-gray-400 text-sm font-medium">Hình ảnh không khả dụng</p>
-            </div>
-          ) : (
-            <img
-              src={IMAGEURL + img}
-              alt={title}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              loading="lazy"
-              onError={handleImageError}
-            />
-          )}
+        <div className="aspect-[3/4] bg-gray-100 relative">{imageError ? (
+          <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100">
+            <div className="text-6xl mb-2">👕</div>
+            <p className="text-gray-400 text-sm font-medium">Hình ảnh không khả dụng</p>
+          </div>
+        ) : (
+          <img
+            src={IMAGEURL + img}
+            alt={title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            loading="lazy"
+            onError={handleImageError}
+          />
+        )}
 
-          {/* Overlay Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+          {/* Overlay Gradient - Hidden on mobile */}
+          <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
 
-          {/* Quick Actions Overlay - Mobile-optimized touch targets */}
+          {/* Quick Actions Overlay - Desktop only */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: isHovered ? 1 : 0 }}
             transition={{ duration: 0.15 }}
-            className="absolute inset-0 flex items-center justify-center gap-3"
+            className="hidden md:flex absolute inset-0 items-center justify-center gap-3"
           >
             <Button
               onClick={(e) => {
@@ -152,14 +151,14 @@ const ProductItem = ({ product, onQuickView }) => {
         </div>
 
         {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
+        <div className="absolute top-3 md:top-3 top-1 left-3 md:left-3 left-1 flex flex-col gap-2 md:gap-2 gap-1 z-10">
           {status === "out-of-stock" && (
-            <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+            <span className="bg-red-500 text-white text-xs md:text-xs text-[10px] font-bold px-3 md:px-3 px-2 py-1 md:py-1 py-0.5 rounded-full">
               Hết hàng
             </span>
           )}
           {discount && status === "in-stock" && (
-            <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse">
+            <span className="bg-red-600 text-white text-xs md:text-xs text-[10px] font-bold px-3 md:px-3 px-2 py-1 md:py-1 py-0.5 rounded-full animate-pulse">
               -{typeof discount === 'object' ? discount.percentage : discount}%
             </span>
           )}
@@ -167,7 +166,7 @@ const ProductItem = ({ product, onQuickView }) => {
             <motion.span
               animate={{ scale: [1, 1.1, 1] }}
               transition={{ repeat: Infinity, duration: 2 }}
-              className="bg-gradient-to-r from-green-400 to-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full"
+              className="bg-gradient-to-r from-green-400 to-blue-500 text-white text-xs md:text-xs text-[10px] font-bold px-3 md:px-3 px-2 py-1 md:py-1 py-0.5 rounded-full"
             >
               ✨ Mới
             </motion.span>
@@ -179,19 +178,18 @@ const ProductItem = ({ product, onQuickView }) => {
           whileHover={{ scale: 1.2 }}
           whileTap={{ scale: 0.9 }}
           onClick={handleWishlistToggle}
-          className="absolute top-3 right-3 w-10 h-10 flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:shadow-xl transition-all"
+          className="absolute top-3 md:top-3 top-1 right-3 md:right-3 right-1 w-10 h-10 md:w-10 md:h-10 w-8 h-8 flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:shadow-xl transition-all"
         >
           {isInWishlist(_id) ? (
-            <HeartFilled className="text-red-500 text-xl" />
+            <HeartFilled className="text-red-500 text-xl md:text-xl text-base" />
           ) : (
-            <HeartOutlined className="text-gray-700 text-xl" />
+            <HeartOutlined className="text-gray-700 text-xl md:text-xl text-base" />
           )}
         </motion.button>
       </Link>
 
       {/* Product Info */}
-      <div className="p-4 space-y-3">
-        {/* Sizes */}
+      <div className="p-4 md:p-4 p-2 space-y-3 md:space-y-3 space-y-1.5">{/* Sizes */}
         {sizes?.length > 0 && (
           <div className="flex items-center gap-1.5 flex-wrap">
             {sizes.slice(0, 4).map((size) => (
@@ -200,7 +198,7 @@ const ProductItem = ({ product, onQuickView }) => {
                 onClick={() => size.quantity > 0 && handleSizeClick(size.size)}
                 disabled={size.quantity === 0}
                 className={`
-                  px-2.5 py-1 text-xs font-bold rounded-md transition-all
+                  px-2.5 py-1 md:px-2.5 md:py-1 px-1.5 py-0.5 text-xs md:text-xs text-[10px] font-bold rounded-md transition-all
                   ${selectedSize === size.size
                     ? "bg-black text-white"
                     : size.quantity === 0
@@ -217,13 +215,13 @@ const ProductItem = ({ product, onQuickView }) => {
 
         {/* Title */}
         <Link to={`/product-detail/${_id}`}>
-          <h3 className="font-bold text-gray-900 text-base line-clamp-2 hover:text-blue-600 transition-colors">
+          <h3 className="font-bold text-gray-900 text-base md:text-base text-sm line-clamp-2 hover:text-blue-600 transition-colors">
             {title}
           </h3>
         </Link>
 
-        {/* Rating & Reviews - Prominent like Vietnamese e-commerce */}
-        <div className="flex items-center gap-2">
+        {/* Rating & Reviews - Hidden on mobile for cleaner Shopee look */}
+        <div className="hidden md:flex items-center gap-2">
           <Rate
             disabled
             defaultValue={avgReview || 5}
@@ -238,36 +236,37 @@ const ProductItem = ({ product, onQuickView }) => {
         </div>
 
         {/* Price */}
+        {/* Price */}
         <div className="flex items-center justify-between">
-          {discount || salePrice ? (
+          {(discount || salePrice) && (salePrice < price) ? (
             <div className="flex flex-col">
-              <span className="text-xl font-black text-red-600">
-                {formatCurrencyVND(salePrice || price)}
+              <span className="text-xl md:text-xl text-base font-black text-red-600">
+                {formatCurrencyVND(salePrice)}
               </span>
-              <span className="text-xs text-gray-400 line-through">
+              <span className="text-xs md:text-xs text-[10px] text-gray-400 line-through">
                 {formatCurrencyVND(price)}
               </span>
             </div>
           ) : (
-            <span className="text-xl font-black text-gray-900">
+            <span className="text-xl md:text-xl text-base font-black text-gray-900">
               {formatCurrencyVND(price)}
             </span>
           )}
         </div>
 
-        {/* Flash Sale Countdown - Small badge below price */}
+        {/* Flash Sale Countdown - Smaller on mobile */}
         {discount && typeof discount === 'object' && discount.endDate &&
           (new Date(discount.endDate) - new Date()) < (7 * 24 * 60 * 60 * 1000) &&
           (new Date(discount.endDate) - new Date()) > 0 && (
-            <div className="mt-2 inline-flex items-center gap-1.5 bg-gradient-to-r from-orange-100 to-red-100 border border-orange-300 rounded-lg px-2 py-1">
-              <span className="text-orange-600 text-xs">⚡</span>
-              <span className="text-orange-700 font-bold text-xs">Flash Sale:</span>
+            <div className="mt-2 inline-flex items-center gap-1.5 md:gap-1.5 gap-1 bg-gradient-to-r from-orange-100 to-red-100 border border-orange-300 rounded-lg px-2 md:px-2 px-1.5 py-1 md:py-1 py-0.5">
+              <span className="text-orange-600 text-xs md:text-xs text-[10px]">⚡</span>
+              <span className="text-orange-700 font-bold text-xs md:text-xs text-[10px]">Flash Sale:</span>
               <CountdownTimer endDate={discount.endDate} compact={true} />
             </div>
           )}
 
-        {/* Trust Badges - Vietnamese E-commerce Style */}
-        <div className="mt-2 space-y-2">
+        {/* Trust Badges - Simplified for mobile */}
+        <div className="mt-2 space-y-2 md:space-y-2 space-y-1 hidden md:block">
           {/* Sold Count - Very important in VN market! */}
           {product.sold && (
             <SoldCountBadge count={product.sold} />
@@ -282,10 +281,17 @@ const ProductItem = ({ product, onQuickView }) => {
             ]}
           />
         </div>
+
+        {/* Mobile-only: Sold count in compact format */}
+        <div className="block md:hidden">
+          {product.sold && (
+            <span className="text-[10px] text-gray-500">Đã bán {product.sold}</span>
+          )}
+        </div>
       </div>
 
-      {/* Bottom Glow Effect */}
-      <div className="absolute -bottom-1 left-0 right-0 h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
+      {/* Bottom Glow Effect - Desktop only */}
+      <div className="hidden md:block absolute -bottom-1 left-0 right-0 h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
     </motion.div>
   );
 };

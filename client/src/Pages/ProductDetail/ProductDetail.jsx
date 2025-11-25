@@ -308,10 +308,10 @@ const ProductDetail = () => {
             )}
 
             <div className="text-3xl font-bold text-gray-900 mb-8 flex items-center gap-3">
-              {productDetail.discount || productDetail.salePrice ? (
+              {(productDetail.discount || productDetail.salePrice) && (productDetail.salePrice < productDetail.price) ? (
                 <>
                   <span className="text-red-600">
-                    {formatCurrencyVND(productDetail.salePrice || productDetail.price)}
+                    {formatCurrencyVND(productDetail.salePrice)}
                   </span>
                   <span className="text-lg text-gray-400 line-through font-normal">
                     {formatCurrencyVND(productDetail.price)}

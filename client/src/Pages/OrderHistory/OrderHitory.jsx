@@ -16,6 +16,7 @@ import { MdCancel } from "react-icons/md";
 import { getOrderByUser, userUpdateStatus } from "../../service/orderService";
 import { createReview } from "../../service/reviewService";
 import { formatCurrencyVND } from "../../utils";
+import { IMAGEURL } from "../../utils/constant";
 import OrderDetail from "../../Components/OrderDetail/OrderDetail";
 
 const OrderHistory = () => {
@@ -100,8 +101,8 @@ const OrderHistory = () => {
               status === "pending"
                 ? "orange"
                 : status === "cancel"
-                ? "red"
-                : "green"
+                  ? "red"
+                  : "green"
             }
           >
             {statusLabels[status] || "Không xác định"}
@@ -207,7 +208,7 @@ const OrderHistory = () => {
     } catch (error) {
       message.error(
         error?.response?.data?.message ||
-          "Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại!"
+        "Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại!"
       );
     }
   };
@@ -228,22 +229,144 @@ const OrderHistory = () => {
     );
     return totalProductPrice;
   };
+  const isMobile = useIsMobile();
+
+  const statusLabels = {
+    pending: "Đang chờ xử lý",
+    cancel: "Đã hủy",
+    processing: "Đang xử lý",
+    delivered: "Đã giao hàng",
+    vnpay: "Đã thanh toán qua vnpay",
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "pending": return "orange";
+      case "cancel": return "red";
+      case "delivered": return "green";
+      case "processing": return "blue";
+      default: return "default";
+    }
+  };
+
+  // Mobile Order Card Component
+  const MobileOrderCard = ({ order }) => {
+    const firstItem = order.cart?.[0];
+    const otherItemsCount = order.cart?.length - 1;
+
+    return (
+      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-3">
+        {/* Header: Shop Name & Status */}
+        <div className="flex justify-between items-center border-b pb-2 mb-3">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-gray-800">Nova Fashion</span>
+          </div>
+          <span className={`text-xs font-medium px-2 py-1 rounded-full ${order.status === 'cancel' ? 'bg-red-100 text-red-600' :
+            order.status === 'delivered' ? 'bg-green-100 text-green-600' :
+              'bg-orange-100 text-orange-600'
+            }`}>
+            {statusLabels[order.status] || order.status}
+          </span>
+        </div>
+
+        {/* Product Preview */}
+        <div className="flex gap-3 mb-3" onClick={() => viewDetails(order)}>
+          <div className="w-16 h-16 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+            {firstItem?.product?.img ? (
+              <img
+                src={`${IMAGEURL}${firstItem.product.img}`}
+                alt={firstItem.product.title}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-gray-400">IMG</div>
+            )}
+          </div>
+          <div className="flex-1">
+            <h4 className="text-sm font-medium line-clamp-1">{firstItem?.product?.title}</h4>
+            <div className="flex justify-between items-center mt-1">
+              <span className="text-xs text-gray-500">x{firstItem?.quantity}</span>
+              {otherItemsCount > 0 && (
+                <span className="text-xs text-gray-400">+{otherItemsCount} sản phẩm khác</span>
+              )}
+            </div>
+            <div className="text-right mt-1">
+              <span className="text-red-500 font-bold">{formatCurrencyVND(firstItem?.product?.salePrice || firstItem?.product?.price)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Total & Actions */}
+        <div className="border-t pt-3">
+          <div className="flex justify-between items-center mb-3">
+            <span className="text-sm text-gray-500">{order.cart?.length} sản phẩm</span>
+            <div className="flex items-center gap-1">
+              <span className="text-sm text-gray-600">Thành tiền:</span>
+              <span className="text-base font-bold text-red-600">{formatCurrencyVND(order.finalAmount || order.totalAmount)}</span>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2">
+            {order.status === "pending" && (
+              <Button
+                danger
+                size="middle"
+                onClick={() => handleCancelOrder(order)}
+                className="flex-1"
+              >
+                Hủy đơn
+              </Button>
+            )}
+
+            {order.status === "delivered" && (
+              <Button
+                type="default"
+                className="bg-yellow-500 text-white border-none flex-1"
+                onClick={() => order.isRating ? null : openReviewModal(order)}
+                disabled={order.isRating}
+              >
+                {order.isRating ? "Đã đánh giá" : "Đánh giá"}
+              </Button>
+            )}
+
+            <Button
+              type="primary" // Changed to primary for better visibility
+              onClick={() => viewDetails(order)}
+              className="flex-1"
+            >
+              Xem chi tiết
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="p-8 bg-gray-50">
-      <h1 className="text-3xl font-semibold text-center mb-8 text-gray-800">
+    <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
+      <h1 className="text-2xl md:text-3xl font-semibold text-center mb-6 md:mb-8 text-gray-800">
         Lịch sử đơn hàng
       </h1>
       {orders?.length ? (
         <>
-          <Card className="shadow-xl rounded-xl bg-white">
-            <Table
-              columns={columns}
-              dataSource={orders}
-              rowKey="_id"
-              pagination={{ pageSize: 5 }}
-              bordered
-            />
-          </Card>
+          {isMobile ? (
+            <div className="space-y-3">
+              {orders.map(order => (
+                <MobileOrderCard key={order._id} order={order} />
+              ))}
+            </div>
+          ) : (
+            <Card className="shadow-xl rounded-xl bg-white">
+              <Table
+                columns={columns}
+                dataSource={orders}
+                rowKey="_id"
+                pagination={{ pageSize: 5 }}
+                bordered
+              />
+            </Card>
+          )}
+
           <OrderDetail
             selectedOrder={selectedOrder}
             isModalVisible={isModalVisible}
@@ -283,12 +406,28 @@ const OrderHistory = () => {
           </Modal>
         </>
       ) : (
-        <span className="flex items-center justify-center font-bold text-xl">
-          Không có đơn hàng nào
+        <span className="flex items-center justify-center font-bold text-xl text-gray-500 py-10">
+          Chưa có đơn hàng nào
         </span>
       )}
     </div>
   );
+};
+
+// Custom hook to detect mobile (copied for local usage or could be imported if shared)
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return isMobile;
 };
 
 export default OrderHistory;
