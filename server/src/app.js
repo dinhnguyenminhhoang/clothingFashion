@@ -3,8 +3,6 @@ const express = require("express");
 const cors = require("cors");
 const { default: helmet, crossOriginResourcePolicy } = require("helmet");
 const morgan = require("morgan");
-// const swaggerSpec = require("./config/swapper.config");
-// const swaggerUi = require("swagger-ui-express");
 
 require("dotenv").config();
 const app = express();
@@ -24,14 +22,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 require("./dbs/init.mongodb");
 //init router
-// app.use(
-//   "/api-docs",
-//   swaggerUi.serve,
-//   swaggerUi.setup(swaggerSpec, {
-//     customCss: ".swagger-ui .topbar { display: none }",
-//     customSiteTitle: "Clothing Fashion API Docs",
-//   })
-// );
 app.use("/", require("./routers"));
 
 app.use((req, res, next) => {

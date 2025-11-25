@@ -23,6 +23,5 @@ router.use(`/v1/api`, require("./payment"));
 // Utility routes
 router.use(`/v1/api`, require("./summary"));
 router.use(`/v1/api`, require("./upload"));
-router.use(`/v1/api`, require("./docxSwapper"));
 
 module.exports = router;

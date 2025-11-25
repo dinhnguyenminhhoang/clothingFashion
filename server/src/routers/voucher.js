@@ -5,13 +5,6 @@ const voucherController = require("../controller/voucher.controller");
 const { authentication, adminAuthentication } = require("../auth/authUtils");
 const { asynchandler } = require("../helpers/asynchandler");
 
-/**
- * @swagger
- * tags:
- *   name: Vouchers
- *   description: Voucher management
- */
-
 // Admin routes
 router.post(
     "/",
