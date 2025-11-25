@@ -1,15 +1,12 @@
 const app = require("./src/app");
-const PORT = process.env.PORT || 3055;
+const port = process.env.PORT || 3000;
 
-const server = app.listen(PORT, () => {
-    console.log(`Closing-server start with ${PORT}`);
-    console.log(`📚 Swagger UI: http://localhost:${PORT}/api-docs`);
-});
-
-process.on("SIGINT", () => {
-    console.log("Closing server...");
-    server.close(() => {
-        console.log("Exit Server Express");
-        process.exit(0);
+// Chỉ lắng nghe port khi chạy ở môi trường local (không phải trên Vercel)
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(port, () => {
+        console.log(`Server running on port ${port}`);
     });
-});
+}
+
+// BẮT BUỘC: Phải export app để Vercel sử dụng
+module.exports = app;
